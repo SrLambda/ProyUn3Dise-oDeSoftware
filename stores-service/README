@@ -1,0 +1,17 @@
+UtalEats Store Service
+
+Este servicio forma parte de la aplicación UtalEats, una plataforma de pedidos de comida para la Universidad de Talca. El microservicio `storesservice` gestiona las tiendas (restaurantes) disponibles en la plataforma.
+
+Tecnologías utilizadas
+
+- Java 17
+- JDK 21
+- Spring Boot
+- Spring Data JPA
+- Hibernate
+- H2 / MySQL (dependiendo del entorno)
+- Maven
+- IntelliJ IDEA 2025.1.3
+
+Estructura del proyecto
+
