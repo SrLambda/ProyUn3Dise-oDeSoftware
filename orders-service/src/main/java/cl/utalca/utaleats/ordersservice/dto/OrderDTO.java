@@ -1,14 +1,11 @@
 package cl.utalca.utaleats.ordersservice.dto;
 
-import java.time.LocalDateTime;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class OrderDTO {
-
-    //private Long storeId;
-    //private String customerName;
-    private LocalDateTime orderDate;
-    //private double totalAmount;
 
     @NotBlank(message = "El nombre del cliente es obligatorio")
     private String customerName;
@@ -19,13 +16,20 @@ public class OrderDTO {
     @PositiveOrZero(message = "El monto total no puede ser negativo")
     private double totalAmount;
 
+    private LocalDateTime orderDate;
+
+    @NotEmpty(message = "El pedido debe contener al menos un producto")
+    @Valid
+    private List<@Valid OrderItemDTO> items;
+
     public OrderDTO() {}
 
-    public OrderDTO(Long storeId, String customerName, LocalDateTime orderDate, double totalAmount) {
+    public OrderDTO(Long storeId, String customerName, LocalDateTime orderDate, double totalAmount, List<OrderItemDTO> items) {
         this.storeId = storeId;
         this.customerName = customerName;
         this.orderDate = orderDate;
         this.totalAmount = totalAmount;
+        this.items = items;
     }
 
     // Getters y setters
@@ -60,5 +64,13 @@ public class OrderDTO {
 
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public List<OrderItemDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<OrderItemDTO> items) {
+        this.items = items;
     }
 }
