@@ -13,6 +13,7 @@
     <modules>
         <module>stores-service</module>
         <module>orders-service</module>
+        <module>ratings-service</module>
     </modules>
 
     <properties>

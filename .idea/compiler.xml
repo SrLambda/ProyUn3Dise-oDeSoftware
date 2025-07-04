@@ -8,12 +8,14 @@
         <outputRelativeToContentRoot value="true" />
         <module name="stores-service" />
         <module name="orders-service" />
+        <module name="ratings-service" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="orders-service" options="-parameters" />
+      <module name="ratings-service" options="-parameters" />
       <module name="stores-service" options="-parameters" />
     </option>
   </component>
