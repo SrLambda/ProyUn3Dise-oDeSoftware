@@ -80,7 +80,7 @@ public class DataSeeder {
                         new Product(null, "Sopa de Lentejas Roja", "https://i.imgur.com/red_lentil_soup.jpg", 6.00, store5),
                         new Product(null, "Brownie Vegano", "https://i.imgur.com/vegan_brownie.jpg", 4.50, store5)
                 ));
-                System.out.println("Datos iniciales cargados.");
+                System.out.println("Datos iniciales cargados con éxito.");
             } else {
                 System.out.println("La base de datos ya contiene tiendas. No se cargarán datos iniciales.");
             }
