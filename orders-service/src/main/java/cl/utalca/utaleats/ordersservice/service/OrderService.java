@@ -1,5 +1,6 @@
 package cl.utalca.utaleats.ordersservice.service;
 
+import cl.utalca.utaleats.ordersservice.client.StoreClient;
 import cl.utalca.utaleats.ordersservice.dto.OrderDTO;
 import cl.utalca.utaleats.ordersservice.dto.OrderItemDTO;
 import cl.utalca.utaleats.ordersservice.exception.ResourceNotFoundException;
@@ -15,24 +16,27 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final StoreClient storeClient;
 
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, StoreClient storeClient) {
         this.orderRepository = orderRepository;
+        this.storeClient = storeClient;
     }
 
-    // Obtener todos los pedidos
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
 
-    // Obtener un pedido por ID
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido con ID " + id + " no encontrado"));
     }
 
-    // Crear nuevo pedido
     public Order createOrder(OrderDTO orderDTO) {
+        if (!storeClient.storeExists(orderDTO.getStoreId())) {
+            throw new ResourceNotFoundException("La tienda con ID " + orderDTO.getStoreId() + " no existe");
+        }
+
         Order order = new Order();
         order.setCustomerName(orderDTO.getCustomerName());
         order.setStoreId(orderDTO.getStoreId());
@@ -40,29 +44,30 @@ public class OrderService {
         order.setTotalAmount(orderDTO.getTotalAmount());
         order.setStatus("PENDIENTE");
 
-        // Convertir los ítems
         for (OrderItemDTO itemDTO : orderDTO.getItems()) {
             OrderItem item = new OrderItem();
             item.setProductId(itemDTO.getProductId());
             item.setQuantity(itemDTO.getQuantity());
             item.setPrice(itemDTO.getPrice());
-            order.addItem(item); // relación bidireccional
+            order.addItem(item);
         }
 
         return orderRepository.save(order);
     }
 
-    // Actualizar un pedido existente
     public Order updateOrder(Long id, OrderDTO updatedOrderDTO) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido con ID " + id + " no encontrado"));
+
+        if (!storeClient.storeExists(updatedOrderDTO.getStoreId())) {
+            throw new ResourceNotFoundException("La tienda con ID " + updatedOrderDTO.getStoreId() + " no existe");
+        }
 
         order.setCustomerName(updatedOrderDTO.getCustomerName());
         order.setStoreId(updatedOrderDTO.getStoreId());
         order.setOrderDate(updatedOrderDTO.getOrderDate() != null ? updatedOrderDTO.getOrderDate() : order.getOrderDate());
         order.setTotalAmount(updatedOrderDTO.getTotalAmount());
 
-        // Reemplazar los ítems
         order.getItems().clear();
         for (OrderItemDTO itemDTO : updatedOrderDTO.getItems()) {
             OrderItem item = new OrderItem();
@@ -76,7 +81,6 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    // Eliminar pedido por ID
     public void deleteOrder(Long id) {
         if (!orderRepository.existsById(id)) {
             throw new ResourceNotFoundException("No se puede eliminar: el pedido con ID " + id + " no existe");
