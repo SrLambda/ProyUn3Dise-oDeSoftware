@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 
 function App() {
     const [stores, setStores] = useState([]);
@@ -14,14 +15,11 @@ function App() {
 
     // Simulación carga tiendas
     useEffect(() => {
-        const dummyStores = [
-            { id: 1, name: "La Pizzería", category: "Pizza", city: "Santiago", rating: 4.5, imageUrl: "https://via.placeholder.com/300x150?text=Pizzer%C3%ADa" },
-            { id: 2, name: "Sushi House", category: "Sushi", city: "Santiago", rating: 4.8, imageUrl: "https://via.placeholder.com/300x150?text=Sushi" },
-            { id: 3, name: "Burger King", category: "Hamburguesas", city: "Concepción", rating: 4.2, imageUrl: "https://via.placeholder.com/300x150?text=Hamburguesa" },
-            { id: 4, name: "Green Salad", category: "Ensaladas", city: "Valparaíso", rating: 4.0, imageUrl: "https://via.placeholder.com/300x150?text=Ensaladas" },
-        ];
-        setStores(dummyStores);
+        axios.get("http://localhost:8080/store")
+            .then(response => setStores(response.data))
+            .catch(error => console.error("Error al obtener tiendas:", error));
     }, []);
+
 
     return (
         <div className="app-container">
