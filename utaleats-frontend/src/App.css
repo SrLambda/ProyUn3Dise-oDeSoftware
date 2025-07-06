@@ -1,3 +1,7 @@
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
 header {
   text-align: center;
   margin-bottom: 1rem;
@@ -13,6 +17,7 @@ header .logo {
 /* Recomendaciones */
 .recommendations h2 {
   margin-bottom: 0.5rem;
+  font-family: 'Poppins', sans-serif;
   font-size: 1.5rem;
   color: #005f48; /* verde oscuro */
 }
@@ -64,6 +69,7 @@ header .logo {
 .stores h2 {
   margin-top: 2rem;
   margin-bottom: 1rem;
+  font-family: 'Poppins', sans-serif;
   font-size: 1.5rem;
   color: #005f48;
 }
@@ -75,10 +81,12 @@ header .logo {
 }
 
 .store-card {
+  display: flex; /* Cambiar de bloque a flex horizontal */
+  align-items: center;
   background: white;
   color: black;
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -92,13 +100,16 @@ header .logo {
 }
 
 .store-card img {
-  width: 100%;
+  width: 150px;
   height: 150px;
   object-fit: cover;
+  border-right: 1px solid #ddd;
 }
 
 .store-info {
   padding: 1rem;
+  font-family: 'Poppins', sans-serif;
+  flex: 1; /* Ocupar el resto del espacio */
 }
 
 .store-info h3 {

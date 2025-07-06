@@ -50,7 +50,7 @@ function App() {
                 <div className="stores-list">
                     {stores.map((store) => (
                         <div key={store.id} className="store-card">
-                            <img src={store.imageUrl} alt={store.name} />
+                            <img src={`http://localhost:8080/${store.imageUrl}`} alt={store.name} />
                             <div className="store-info">
                                 <h3>{store.name}</h3>
                                 <p>{store.category} • {store.city}</p>
