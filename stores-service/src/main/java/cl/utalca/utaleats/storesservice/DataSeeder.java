@@ -20,6 +20,7 @@ public class DataSeeder {
                 System.out.println("Cargando datos iniciales...");
 
                 // --- Tienda 1: Pizza ---
+
                 Store store1 = storeRepository.save(new Store(null, "Pizzería Loca", "Pizza", "Curicó", "pizza.png", 4.5));
                 productRepository.saveAll(Arrays.asList(
                         new Product(null, "Pizza Margarita", "https://i.imgur.com/margarita.jpg", 8.50, store1),

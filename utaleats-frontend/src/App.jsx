@@ -16,8 +16,13 @@ function App() {
     // Simulación carga tiendas
     useEffect(() => {
         axios.get("http://localhost:8080/store")
-            .then(response => setStores(response.data))
-            .catch(error => console.error("Error al obtener tiendas:", error));
+            .then((response) => {
+                setStores(response.data);
+                console.log("Tiendas obtenidas:", response.data); // DEBUG
+            })
+            .catch((error) => {
+                console.error("Error al obtener tiendas:", error);
+            });
     }, []);
 
 

@@ -1,5 +1,6 @@
 package cl.utalca.utaleats.storesservice.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.util.ArrayList;
@@ -28,6 +29,10 @@ public class Store {
     @DecimalMax(value = "5.0", inclusive = true, message = "El rating no puede ser mayor a 5")
     private double rating;
 
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Product> products = new ArrayList<>();
+
     public Store() {}
 
     public Store(Long id, String name, String category, String city, String imageUrl, double rating) {
@@ -41,59 +46,19 @@ public class Store {
 
     // Getters y setters
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public double getRating() {
-        return rating;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
-
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products = new ArrayList<>();
-
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public String getCategory() { return category; }
+    public String getCity() { return city; }
+    public String getImageUrl() { return imageUrl; }
+    public double getRating() { return rating; }
     public List<Product> getProducts() { return products; }
 
+    public void setId(Long id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setCategory(String category) { this.category = category; }
+    public void setCity(String city) { this.city = city; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setRating(double rating) { this.rating = rating; }
     public void setProducts(List<Product> products) { this.products = products; }
 }
-
