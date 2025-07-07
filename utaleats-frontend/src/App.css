@@ -146,4 +146,63 @@ header .logo {
   .store-card {
     max-width: 100%;
   }
+
+}
+
+/* BOTÓN FLOTANTE DEL CARRITO */
+.cart-button {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background: #760e32;
+  border: 2px solid #005f48;
+  border-radius: 50%; /* completamente redondeado */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cart-button:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+.cart-button img {
+  width: 65%;
+  height: 65%;
+  object-fit: contain;
+}
+
+/* PANEL EMERGENTE CARRITO */
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  right: -100%; /* oculto por defecto */
+  width: 30%;
+  max-width: 400px;
+  height: 100%;
+  background-color: white;
+  border-left: 4px solid #005f48;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  box-shadow: -6px 0 16px rgba(0,0,0,0.2);
+  padding: 2rem 1.5rem;
+  transition: right 0.3s ease;
+  z-index: 999;
+}
+
+.cart-overlay.open {
+  right: 0;
+}
+
+.cart-overlay h2 {
+  color: #005f48;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
 }

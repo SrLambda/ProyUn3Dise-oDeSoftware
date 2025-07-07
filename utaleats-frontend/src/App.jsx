@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import './App.css';
 
 function App() {
     const [stores, setStores] = useState([]);
+    const [cartOpen, setCartOpen] = useState(false);
 
-    // Datos fijos para recomendaciones
     const recommendations = [
         { id: 1, title: "Pizza", image: "https://via.placeholder.com/120?text=Pizza" },
         { id: 2, title: "Sushi", image: "https://via.placeholder.com/120?text=Sushi" },
@@ -13,25 +14,21 @@ function App() {
         { id: 5, title: "Postres", image: "https://via.placeholder.com/120?text=Postres" },
     ];
 
-    // Simulación carga tiendas
     useEffect(() => {
         axios.get("http://localhost:8080/store")
             .then((response) => {
                 setStores(response.data);
-                console.log("Tiendas obtenidas:", response.data); // DEBUG
             })
             .catch((error) => {
                 console.error("Error al obtener tiendas:", error);
             });
     }, []);
 
-
     return (
         <div className="app-container">
             <header>
                 <img src="/utal_eats_logo.png" alt="Utal Eats Logo" className="logo" />
             </header>
-
 
             <section className="recommendations">
                 <h2>Recomendaciones para ti</h2>
@@ -45,6 +42,18 @@ function App() {
                 </div>
             </section>
 
+            {/* Botón fijo flotante del carrito */}
+            <div className="cart-button" onClick={() => setCartOpen(!cartOpen)}>
+                <img src="/carrito.png" alt="Carrito" />
+            </div>
+
+            {/* Interfaz emergente del carrito */}
+            <div className={`cart-overlay ${cartOpen ? 'open' : ''}`}>
+                <h2>Carrito</h2>
+                {/* agregar contenido del carrito*/}
+            </div>
+
+            {/* Tiendas */}
             <section className="stores">
                 <h2>Tiendas disponibles</h2>
                 <div className="stores-list">
