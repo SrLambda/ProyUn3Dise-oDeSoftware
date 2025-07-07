@@ -5,6 +5,13 @@ import './App.css';
 function App() {
     const [stores, setStores] = useState([]);
     const [cartOpen, setCartOpen] = useState(false);
+    const [selectedStore, setSelectedStore] = useState(null);
+    const [storeProducts, setStoreProducts] = useState([]);
+
+    const openStoreView = (store) => {
+        setSelectedStore(store);
+        setStoreProducts(store.products || []); // o puedes hacer un fetch si los productos no vienen en la tienda
+    };
 
     const recommendations = [
         { id: 1, title: "Pizza", image: "https://via.placeholder.com/120?text=Pizza" },
@@ -58,12 +65,44 @@ function App() {
                 <button className="buy-button">Comprar</button>
             </div>
 
+            {selectedStore && (
+                <div className="store-overlay">
+                    <div className="store-header">
+                        <button className="close-store-button" onClick={() => setSelectedStore(null)}>←</button>
+                        <h2>{selectedStore.name}</h2>
+                    </div>
+                    <div className="product-list">
+                        {storeProducts.map((product, idx) => (
+                            <div key={idx} className="product-card">
+                                <img src={product.imageUrl} alt={product.name} />
+                                <div className="product-info">
+                                    <h4>{product.name}</h4>
+                                    <p>${product.price.toFixed(2)}</p>
+                                </div>
+                                <button
+                                    className="add-to-cart-button"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // evita propagación de clics
+                                        const btn = e.currentTarget;
+                                        btn.classList.add('clicked');
+                                        setTimeout(() => btn.classList.remove('clicked'), 500);
+                                        // Aquí se agregará lógica del carrito después
+                                    }}
+                                >
+                                    +
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Tiendas */}
             <section className="stores">
                 <h2>Tiendas disponibles</h2>
                 <div className="stores-list">
                     {stores.map((store) => (
-                        <div key={store.id} className="store-card">
+                        <div key={store.id} className="store-card" onClick={() => openStoreView(store)}>
                             <img src={`http://localhost:8080/${store.imageUrl}`} alt={store.name} />
                             <div className="store-info">
                                 <h3>{store.name}</h3>
