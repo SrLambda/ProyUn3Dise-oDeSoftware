@@ -422,3 +422,72 @@ header .logo {
   color: #555;
   font-size: 0.95rem;
 }
+
+.added-to-cart-message {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #760e32;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  font-weight: bold;
+  z-index: 3000;
+  animation: slideUpFade 2s ease forwards;
+}
+
+@keyframes slideUpFade {
+  0% {
+    bottom: -100px;
+    opacity: 0;
+  }
+  20% {
+    bottom: 15%;
+    opacity: 1;
+  }
+  80% {
+    bottom: 15%;
+    opacity: 1;
+  }
+  100% {
+    bottom: -100px;
+    opacity: 0;
+  }
+}
+
+.order-message {
+  position: fixed;
+  bottom: 25%;
+  right:12%;
+  transform: translateX(50%); /* Centra el mensaje respecto a ese punto */ /*Centra el mensaje respecto a ese punto */
+  width: 30%;
+  max-width: 250px;
+  margin-right: 0;
+  background-color: #760e32;
+  color: white;
+  border-radius: 20px;
+  padding: 1rem;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  z-index: 3000;
+  animation: slideUpFade 3s ease forwards;
+  white-space: pre-line;
+}
+/*
+.order-message {
+  position: fixed;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 250px;
+  background-color: #760e32;
+  color: white;
+  border-radius: 20px;
+  padding: 1rem;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  z-index: 3000;
+  animation: slideUpFade 3s ease forwards;
+  white-space: pre-line;
+}*/

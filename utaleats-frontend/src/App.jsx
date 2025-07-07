@@ -8,6 +8,15 @@ function App() {
     const [selectedStore, setSelectedStore] = useState(null);
     const [storeProducts, setStoreProducts] = useState([]);
     const [cart, setCart] = useState([]);
+
+    const [showAddedMessage, setShowAddedMessage] = useState(false);
+    const triggerAddedMessage = () => {
+        setShowAddedMessage(true);
+        setTimeout(() => setShowAddedMessage(false), 2000);
+    };
+    const [orderMessage, setOrderMessage] = useState(null);
+
+
     const addToCart = (product, storeId) => {
         setCart(prevCart => {
             const index = prevCart.findIndex(item => item.productId === product.id);
@@ -52,9 +61,15 @@ function App() {
 
         try {
             const response = await axios.post("http://localhost:8081/orders", order);
-            alert("✅ Pedido realizado con éxito. ID: " + response.data.id);
+
+            setOrderMessage(`Pedido Realizado\nID pedido: ${response.data.id}`);
+
             setCart([]); // Vaciar carrito
-            setCartOpen(false); // Cerrar panel
+
+            setTimeout(() => {
+                setOrderMessage(null); // Ocultar mensaje
+                setCartOpen(false);    // Cerrar carrito después del mensaje
+            }, 3000); // 3 segundos visible
         } catch (error) {
             console.error("Error al realizar pedido:", error);
             alert("Hubo un error al procesar el pedido.");
@@ -159,8 +174,8 @@ function App() {
                                         btn.classList.add('clicked');
                                         setTimeout(() => btn.classList.remove('clicked'), 500);
 
-                                        // Lógica real para agregar al carrito
-                                        addToCart(product, selectedStore.id);
+                                        addToCart(product, selectedStore.id);  // Agregar al carrito
+                                        triggerAddedMessage(); // Mostrar mensaje emergente
                                     }}
                                 >
                                     +
@@ -187,6 +202,21 @@ function App() {
                     ))}
                 </div>
             </section>
+
+            {showAddedMessage && (
+                <div className="added-to-cart-message">
+                    ¡Agregado al Carrito!
+                </div>
+            )}
+
+            {orderMessage && (
+                <div className="order-message">
+                    {orderMessage.split('\n').map((line, idx) => (
+                        <p key={idx}>{line}</p>
+                    ))}
+                </div>
+            )}
+
         </div>
     );
 }
