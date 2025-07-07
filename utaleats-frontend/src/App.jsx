@@ -47,10 +47,15 @@ function App() {
                 <img src="/carrito.png" alt="Carrito" />
             </div>
 
+            {cartOpen && <div className="backdrop" onClick={() => setCartOpen(false)}></div>}
             {/* Interfaz emergente del carrito */}
             <div className={`cart-overlay ${cartOpen ? 'open' : ''}`}>
-                <h2>Carrito</h2>
-                {/* agregar contenido del carrito*/}
+                <div className="cart-header">
+                    <button className="close-cart-button" onClick={() => setCartOpen(false)}>←</button>
+                    <h2>Carrito</h2>
+                </div>
+                {/* agregar productos */}
+                <button className="buy-button">Comprar</button>
             </div>
 
             {/* Tiendas */}
