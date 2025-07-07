@@ -26,7 +26,12 @@ public class DataSeeder {
                         new Product(null, "Pizza Pepperoni", "https://i.imgur.com/pepperoni.jpg", 10.00, store1),
                         new Product(null, "Pizza Cuatro Quesos", "https://i.imgur.com/cuatro_quesos.jpg", 11.50, store1),
                         new Product(null, "Calzone de Jamón", "https://i.imgur.com/calzone.jpg", 9.00, store1),
-                        new Product(null, "Tiramisú", "https://i.imgur.com/tiramisu.jpg", 4.00, store1)
+                        new Product(null, "Tiramisú", "https://i.imgur.com/tiramisu.jpg", 4.00, store1),
+                        new Product(null, "Pizza Hawaiana", "https://i.imgur.com/hawaiana.jpg", 10.50, store1),
+                        new Product(null, "Pizza Vegetariana", "https://i.imgur.com/vegetariana.jpg", 9.80, store1),
+                        new Product(null, "Stromboli de Pepperoni", "https://i.imgur.com/stromboli.jpg", 10.20, store1),
+                        new Product(null, "Pan de Ajo con Queso", "https://i.imgur.com/panajo.jpg", 3.50, store1),
+                        new Product(null, "Cannoli Siciliano", "https://i.imgur.com/cannoli.jpg", 4.20, store1)
                 ));
 
                 // --- Tienda 2: Sushi ---
@@ -36,7 +41,12 @@ public class DataSeeder {
                         new Product(null, "Roll California (8u)", "https://i.imgur.com/roll_california.jpg", 9.00, store2),
                         new Product(null, "Sashimi Mixto", "https://i.imgur.com/sashimi_mixto.jpg", 12.00, store2),
                         new Product(null, "Gyoza de Cerdo (5u)", "https://i.imgur.com/gyoza.jpg", 5.00, store2),
-                        new Product(null, "Tempura Mixta", "https://i.imgur.com/tempura.jpg", 8.00, store2)
+                        new Product(null, "Tempura Mixta", "https://i.imgur.com/tempura.jpg", 8.00, store2),
+                        new Product(null, "Uramaki Atún Picante", "https://i.imgur.com/uramaki_atun.jpg", 9.50, store2),
+                        new Product(null, "Roll Dragón", "https://i.imgur.com/roll_dragon.jpg", 11.00, store2),
+                        new Product(null, "Yakimeshi de Verduras", "https://i.imgur.com/yakimeshi.jpg", 6.00, store2),
+                        new Product(null, "Tonkatsu Don", "https://i.imgur.com/tonkatsu.jpg", 10.00, store2),
+                        new Product(null, "Mochi de Té Verde", "https://i.imgur.com/mochi.jpg", 3.80, store2)
                 ));
 
                 // --- Tienda 3: Burger ---

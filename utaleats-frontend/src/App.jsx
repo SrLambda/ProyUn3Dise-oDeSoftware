@@ -7,10 +7,63 @@ function App() {
     const [cartOpen, setCartOpen] = useState(false);
     const [selectedStore, setSelectedStore] = useState(null);
     const [storeProducts, setStoreProducts] = useState([]);
+    const [cart, setCart] = useState([]);
+    const addToCart = (product, storeId) => {
+        setCart(prevCart => {
+            const index = prevCart.findIndex(item => item.productId === product.id);
+
+            if (index !== -1) {
+                // Ya existe, aumentar cantidad
+                const updatedCart = [...prevCart];
+                updatedCart[index].quantity += 1;
+                return updatedCart;
+            } else {
+                return [...prevCart, {
+                    productId: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1,
+                    storeId: storeId
+                }];
+            }
+        });
+    };
+
+    const handleComprar = async () => {
+        if (cart.length === 0) {
+            alert("Tu carrito está vacío.");
+            return;
+        }
+
+        const storeId = cart[0].storeId; // asumimos que todos los productos son de la misma tienda
+        const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+        const order = {
+            customerName: "Cliente Demo", // puedes luego usar un input o login
+            storeId: storeId,
+            totalAmount: totalAmount,
+            orderDate: new Date().toISOString(), // opcional
+            items: cart.map(item => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                price: item.price
+            }))
+        };
+
+        try {
+            const response = await axios.post("http://localhost:8081/orders", order);
+            alert("✅ Pedido realizado con éxito. ID: " + response.data.id);
+            setCart([]); // Vaciar carrito
+            setCartOpen(false); // Cerrar panel
+        } catch (error) {
+            console.error("Error al realizar pedido:", error);
+            alert("Hubo un error al procesar el pedido.");
+        }
+    };
 
     const openStoreView = (store) => {
         setSelectedStore(store);
-        setStoreProducts(store.products || []); // o puedes hacer un fetch si los productos no vienen en la tienda
+        setStoreProducts(store.products || []);
     };
 
     const recommendations = [
@@ -55,14 +108,33 @@ function App() {
             </div>
 
             {cartOpen && <div className="backdrop" onClick={() => setCartOpen(false)}></div>}
-            {/* Interfaz emergente del carrito */}
+
             <div className={`cart-overlay ${cartOpen ? 'open' : ''}`}>
                 <div className="cart-header">
                     <button className="close-cart-button" onClick={() => setCartOpen(false)}>←</button>
                     <h2>Carrito</h2>
                 </div>
-                {/* agregar productos */}
-                <button className="buy-button">Comprar</button>
+
+                {/* 🛒 Contenido del carrito */}
+                <div className="cart-content">
+                    {cart.length === 0 ? (
+                        <p className="cart-empty">Tu carrito está vacío.</p>
+                    ) : (
+                        <>
+                            {cart.map((item, index) => (
+                                <div key={index} className="cart-item">
+                                    <p>{item.name} x{item.quantity}</p>
+                                    <p>${(item.price * item.quantity).toFixed(2)}</p>
+                                </div>
+                            ))}
+                            <hr className="cart-separator" />
+                            <p className="cart-total"><strong>Total:</strong> ${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</p>
+                        </>
+                    )}
+                </div>
+
+                {/* Botón comprar */}
+                <button className="buy-button" onClick={handleComprar}>Comprar</button>
             </div>
 
             {selectedStore && (
@@ -82,11 +154,13 @@ function App() {
                                 <button
                                     className="add-to-cart-button"
                                     onClick={(e) => {
-                                        e.stopPropagation(); // evita propagación de clics
+                                        e.stopPropagation();
                                         const btn = e.currentTarget;
                                         btn.classList.add('clicked');
                                         setTimeout(() => btn.classList.remove('clicked'), 500);
-                                        // Aquí se agregará lógica del carrito después
+
+                                        // Lógica real para agregar al carrito
+                                        addToCart(product, selectedStore.id);
                                     }}
                                 >
                                     +

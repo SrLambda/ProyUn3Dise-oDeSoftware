@@ -1,6 +1,7 @@
 package cl.utalca.utaleats.ordersservice.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 public class OrderItem {
@@ -17,6 +18,7 @@ public class OrderItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
+    @JsonBackReference
     private Order order;
 
     public OrderItem() {}
