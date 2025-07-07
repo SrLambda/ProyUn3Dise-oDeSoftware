@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import pizzaImage from './assets/pizza.png';
+import sushiImage from './assets/sushi.png';
+import burguerImage from './assets/burger.png';
+import saladImage from './assets/salad.png';
+import postresImage from './assets/postres.png';
 
 function App() {
     const [stores, setStores] = useState([]);
 
     // Datos fijos para recomendaciones
     const recommendations = [
-        { id: 1, title: "Pizza", image: "https://via.placeholder.com/120?text=Pizza" },
-        { id: 2, title: "Sushi", image: "https://via.placeholder.com/120?text=Sushi" },
-        { id: 3, title: "Hamburguesa", image: "https://via.placeholder.com/120?text=Hamburguesa" },
-        { id: 4, title: "Ensaladas", image: "https://via.placeholder.com/120?text=Ensaladas" },
-        { id: 5, title: "Postres", image: "https://via.placeholder.com/120?text=Postres" },
+        { id: 1, title: "Pizza", image: pizzaImage },
+        { id: 2, title: "Sushi", image: sushiImage },
+        { id: 3, title: "Hamburguesa", image: burguerImage },
+        { id: 4, title: "Ensaladas", image: saladImage },
+        { id: 5, title: "Postres", image: postresImage },
     ];
 
     // Simulación carga tiendas
