@@ -31,7 +31,7 @@ body {
     border-radius: 10px;
     border-style: double;
     border-color: #005f48;
-    border-width: 10px;
+    border-width: 20px;
     padding: 30px; /* Añade un poco de espacio alrededor del contenido */
     box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
     min-height: 100vh; /* Asegura que la sección central cubra la altura */

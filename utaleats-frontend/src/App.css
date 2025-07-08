@@ -44,7 +44,7 @@ header .logo {
 
 .rec-item {
   flex: 0 0 auto;
-  width: 130px;
+  width: 120px;
   background: white;
   color: black;
   border-radius: 12px;
@@ -159,8 +159,8 @@ header .logo {
   position: fixed;
   top: 100px;
   right: 100px;
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   background: #760e32;
   border: 2px solid #005f48;
   border-radius: 12px;
@@ -175,8 +175,8 @@ header .logo {
 
 .contenedor-transparente {
   background-color: transparent;
-  width: 20px;
-  height: 1px;
+  width: 200px;
+  height: 100px;
 }
 
 .cart-button:hover {
