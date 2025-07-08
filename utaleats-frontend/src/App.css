@@ -175,8 +175,8 @@ header .logo {
 
 .contenedor-transparente {
   background-color: transparent;
-  width: 200px;
-  height: 100px;
+  width: 1px;
+  height: 1px;
 }
 
 .cart-button:hover {
