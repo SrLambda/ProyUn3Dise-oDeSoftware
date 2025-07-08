@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/UtalEats.iml" filepath="$PROJECT_DIR$/UtalEats.iml" />
       <module fileurl="file://$PROJECT_DIR$/ussers-service/users-service.iml" filepath="$PROJECT_DIR$/ussers-service/users-service.iml" />
     </modules>
   </component>
