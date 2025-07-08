@@ -28,8 +28,9 @@ body {
     width: 80%; /* Ajusta el ancho de la sección central según necesites */
     max-width: 1200px; /* Establece un ancho máximo si lo deseas */
     background-color: #760e32; /* Reemplaza con el color de fondo actual de tu app */
+    border-radius: 10px;
     border-style: double;
-    border: #005f48;
+    border-color: #005f48;
     border-width: 10px;
     padding: 30px; /* Añade un poco de espacio alrededor del contenido */
     box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
