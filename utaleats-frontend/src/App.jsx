@@ -16,6 +16,24 @@ function App() {
     };
     const [orderMessage, setOrderMessage] = useState(null);
 
+    const [showComments, setShowComments] = useState(false);
+    const [selectedProductForComments, setSelectedProductForComments] = useState(null);
+
+    const openCommentsForProduct = (product) => {
+        console.log("🟢 Abriendo comentarios para", product.name);
+        setSelectedProductForComments(product);
+        setShowComments(true);
+    };
+
+    const closeComments = () => {
+        console.log("🔴 Cerrando panel de comentarios");
+        setShowComments(false);
+        setSelectedProductForComments(null);
+    }
+
+    useEffect(() => {
+        console.log("📺 Estado showComments:", showComments);
+    }, [showComments]);
 
     const addToCart = (product, storeId) => {
         setCart(prevCart => {
@@ -166,26 +184,64 @@ function App() {
                                     <h4>{product.name}</h4>
                                     <p>${product.price.toFixed(2)}</p>
                                 </div>
-                                <button
-                                    className="add-to-cart-button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        const btn = e.currentTarget;
-                                        btn.classList.add('clicked');
-                                        setTimeout(() => btn.classList.remove('clicked'), 500);
+                                <div className="product-actions">
+                                    {/* Botón de comentario */}
+                                    <button
+                                        className="comment-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const btn = e.currentTarget;
+                                            btn.classList.add('clicked');
+                                            setTimeout(() => btn.classList.remove('clicked'), 500);
+                                            openCommentsForProduct(product);
+                                        }}
+                                    >
+                                        <img src="/comentario.png" alt="Comentarios" />
+                                    </button>
 
-                                        addToCart(product, selectedStore.id);  // Agregar al carrito
-                                        triggerAddedMessage(); // Mostrar mensaje emergente
-                                    }}
-                                >
-                                    +
-                                </button>
+                                    {/* Botón + para agregar al carrito */}
+                                    <button
+                                        className="add-to-cart-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const btn = e.currentTarget;
+                                            btn.classList.add('clicked');
+                                            setTimeout(() => btn.classList.remove('clicked'), 500);
+
+                                            addToCart(product, selectedStore.id);
+                                            triggerAddedMessage();
+                                        }}
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
             )}
 
+            <div className={`comments-overlay ${showComments ? 'open' : ''}`}>
+                <div className="comments-header">
+                    <button className="close-comments-button" onClick={closeComments}>←</button>
+                    <h2>Comentarios</h2>
+                </div>
+
+                {/* 🗨 Lista de comentarios (más adelante implementaremos esto) */}
+                <div className="comments-list">
+                    <p>No hay comentarios todavía.</p>
+                </div>
+
+                <div className="comments-actions">
+                    <textarea className="comment-textarea" placeholder="Escribe un comentario..."></textarea>
+                    <button className="comment-send-button">
+                        📤
+                    </button>
+                    <button className="comment-star-button">
+                        ⭐
+                    </button>
+                </div>
+            </div>
             {/* Tiendas */}
             <section className="stores">
                 <h2>Tiendas disponibles</h2>
