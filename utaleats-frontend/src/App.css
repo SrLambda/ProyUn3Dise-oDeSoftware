@@ -44,7 +44,7 @@ header .logo {
 
 .rec-item {
   flex: 0 0 auto;
-  width: 120px;
+  width: 140px;
   background: white;
   color: black;
   border-radius: 12px;
@@ -162,7 +162,8 @@ header .logo {
   width: 100px;
   height: 100px;
   background: #760e32;
-  border: 2px solid #005f48;
+  border: 10px solid #005f48;
+  box-shadow: 0 6px 14px #005f48;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
   cursor: pointer;
@@ -181,8 +182,11 @@ header .logo {
 
 .cart-button:hover {
   transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+  background: #005f48;
+  border: 2px solid #760e32;
+  box-shadow: 0 6px 14px #760e32;
 }
+
 
 .cart-button img {
   width: 65%;

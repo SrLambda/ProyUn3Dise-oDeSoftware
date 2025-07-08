@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "start": "vite --host",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "node_modules/.bin/vite",
+    "dev": "npx vite",
+    "start": "node_modules/.bin/vite --host",
+    "build": "node_modules/.bin/vite build",
+    "lint": "node_modules/.bin/eslint .",
+    "preview": "node_modules/.bin/vite preview"
   },
   "dependencies": {
     "axios": "^1.10.0",
