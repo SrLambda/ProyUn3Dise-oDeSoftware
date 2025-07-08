@@ -7,6 +7,9 @@ public class RatingDTO {
     @NotNull(message = "El ID de la tienda es obligatorio")
     private Long storeId;
 
+    @NotNull(message = "El ID del producto es obligatorio")
+    private Long productId;
+
     @NotNull(message = "El ID del usuario es obligatorio")
     private Long userId;
 
@@ -19,8 +22,9 @@ public class RatingDTO {
     // Constructores
     public RatingDTO() {}
 
-    public RatingDTO(Long storeId, Long userId, int score, String comment) {
+    public RatingDTO(Long storeId, Long productId, Long userId, int score, String comment) {
         this.storeId = storeId;
+        this.productId = productId;
         this.userId = userId;
         this.score = score;
         this.comment = comment;
@@ -33,6 +37,14 @@ public class RatingDTO {
 
     public void setStoreId(Long storeId) {
         this.storeId = storeId;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
     public Long getUserId() {

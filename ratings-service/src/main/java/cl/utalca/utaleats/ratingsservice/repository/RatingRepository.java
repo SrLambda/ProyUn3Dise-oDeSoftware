@@ -9,6 +9,8 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     // Buscar todas las calificaciones de una tienda específica
     List<Rating> findByStoreId(Long storeId);
 
+    List<Rating> findByProductId(Long productId);
+
     // Buscar todas las calificaciones hechas por un usuario específico
     List<Rating> findByUserId(Long userId);
 

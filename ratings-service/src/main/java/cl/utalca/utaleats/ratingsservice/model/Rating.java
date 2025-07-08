@@ -13,6 +13,9 @@ public class Rating {
     @NotNull(message = "El ID de la tienda es obligatorio")
     private Long storeId;
 
+    @NotNull(message = "El ID del producto es obligatorio")
+    private Long productId;
+
     @NotNull(message = "El ID del usuario es obligatorio")
     private Long userId;
 
@@ -25,8 +28,9 @@ public class Rating {
     // Constructores
     public Rating() {}
 
-    public Rating(Long storeId, Long userId, int score, String comment) {
+    public Rating(Long storeId, Long productId, Long userId, int score, String comment) {
         this.storeId = storeId;
+        this.productId = productId;
         this.userId = userId;
         this.score = score;
         this.comment = comment;
@@ -39,6 +43,10 @@ public class Rating {
 
     public Long getStoreId() {
         return storeId;
+    }
+
+    public Long getProductId() {
+        return productId;
     }
 
     public Long getUserId() {
@@ -59,6 +67,10 @@ public class Rating {
 
     public void setStoreId(Long storeId) {
         this.storeId = storeId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
     public void setUserId(Long userId) {

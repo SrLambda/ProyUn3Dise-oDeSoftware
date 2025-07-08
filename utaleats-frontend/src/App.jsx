@@ -15,6 +15,9 @@ function App() {
     const [cart, setCart] = useState([]);
     const [showStarSelector, setShowStarSelector] = useState(false);
     const [selectedStars, setSelectedStars] = useState("⭐");
+    const [commentText, setCommentText] = useState("");
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState("");
 
     const [showAddedMessage, setShowAddedMessage] = useState(false);
     const triggerAddedMessage = () => {
@@ -43,12 +46,6 @@ function App() {
     const [showComments, setShowComments] = useState(false);
     const [selectedProductForComments, setSelectedProductForComments] = useState(null);
 
-    const openCommentsForProduct = (product) => {
-        console.log("🟢 Abriendo comentarios para", product.name);
-        setSelectedProductForComments(product);
-        setShowComments(true);
-    };
-
     const closeComments = () => {
         console.log("🔴 Cerrando panel de comentarios");
         setShowComments(false);
@@ -58,6 +55,22 @@ function App() {
     useEffect(() => {
         console.log("📺 Estado showComments:", showComments);
     }, [showComments]);
+
+    const fetchComments = async (productId) => {
+        try {
+            const response = await axios.get(`http://localhost:8082/ratings/product/${productId}`);
+            setComments(response.data);
+        } catch (error) {
+            console.error("❌ Error al cargar comentarios:", error);
+        }
+    };
+
+    const openCommentsForProduct = (product) => {
+        console.log("🟢 Abriendo comentarios para", product.name);
+        setSelectedProductForComments(product);
+        setShowComments(true);
+        fetchComments(product.id);
+    };
 
     const addToCart = (product, storeId) => {
         setCart(prevCart => {
@@ -142,6 +155,39 @@ function App() {
                 console.error("Error al obtener tiendas:", error);
             });
     }, []);
+
+    const handleEnviarRating = async () => {
+        if (!selectedProductForComments || !selectedStore) {
+            alert("Error: producto o tienda no seleccionados");
+            return;
+        }
+
+        if (selectedStars === "⭐") {
+            alert("Por favor, selecciona una puntuación de estrellas antes de enviar.");
+            return;
+        }
+
+        const ratingData = {
+            storeId: selectedStore.id,
+            productId: selectedProductForComments.id,  // ✅ Nuevo: asociar comentario al producto
+            userId: 1, // Cambia esto si tienes un sistema de usuarios
+            score: parseInt(selectedStars[0]), // ✅ convertir '3⭐' a número
+            comment: commentText.trim()
+        };
+
+        try {
+            const response = await axios.post("http://localhost:8082/ratings", ratingData);
+            console.log("✅ Calificación enviada:", response.data);
+            alert("¡Gracias por tu calificación!");
+
+            setCommentText("");           // Limpiar comentario
+            setSelectedStars("⭐");       // Resetear estrellas
+            fetchComments(selectedProductForComments.id); // ✅ Cargar comentarios del producto
+        } catch (error) {
+            console.error("❌ Error al enviar rating:", error);
+            alert("Ocurrió un error al enviar tu calificación.");
+        }
+    };
 
     return (
         <div className="app-container">
@@ -257,14 +303,53 @@ function App() {
                     <h2>Comentarios</h2>
                 </div>
 
-                {/* 🗨 Lista de comentarios (más adelante implementaremos esto) */}
                 <div className="comments-list">
-                    <p>No hay comentarios todavía.</p>
+                    {comments && comments.length === 0 ? (
+                        <p>No hay comentarios todavía.</p>
+                    ) : (
+                        comments.map((comment, index) => (
+                            <div key={index} className="comment-item">
+                                <p className="comment-user">Usuario {comment.userId}</p>
+                                <div className="comment-content">
+                                    <span>{comment.comment}</span>
+                                    <span>{comment.score}⭐</span>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
 
                 <div className="comments-actions">
-                    <textarea className="comment-textarea" placeholder="Escribe un comentario..."></textarea>
-                    <button className="comment-send-button">
+                    <textarea
+                        className="comment-textarea"
+                        placeholder="Escribe un comentario..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                    ></textarea>
+                    <button
+                        className="comment-send-button"
+                        disabled={selectedStars === "⭐"} // Desactivar si no eligió
+                        onClick={async () => {
+                            try {
+                                const payload = {
+                                    storeId: selectedStore.id,
+                                    userId: 999, // reemplaza con ID real si tienes login
+                                    comment: newComment,
+                                    score: parseInt(selectedStars[0]),
+                                    productId: selectedProductForComments.id,
+                                };
+
+                                const response = await axios.post("http://localhost:8082/ratings", payload);
+
+                                console.log("✅ Comentario enviado:", response.data);
+                                setNewComment("");              // Limpiar input
+                                setSelectedStars("⭐");         // Reiniciar estrellas
+                                fetchComments(selectedProductForComments.id); // Actualizar lista
+                            } catch (err) {
+                                console.error("❌ Error al enviar comentario:", err);
+                            }
+                        }}
+                    >
                         📤
                     </button>
                     <div className="star-container">

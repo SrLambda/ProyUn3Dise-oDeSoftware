@@ -37,6 +37,11 @@ public class RatingController {
         return ratingService.getRatingsByStoreId(storeId);
     }
 
+    @GetMapping("/product/{productId}")
+    public List<Rating> getRatingsByProductId(@PathVariable Long productId) {
+        return ratingService.getRatingsByProductId(productId);
+    }
+
     // Obtener calificaciones por ID de usuario
     @GetMapping("/user/{userId}")
     public List<Rating> getRatingsByUserId(@PathVariable Long userId) {

@@ -33,6 +33,10 @@ public class RatingService {
         return ratingRepository.findByStoreId(storeId);
     }
 
+    public List<Rating> getRatingsByProductId(Long productId) {
+        return ratingRepository.findByProductId(productId);
+    }
+
     public List<Rating> getRatingsByUserId(Long userId) {
         return ratingRepository.findByUserId(userId);
     }
@@ -45,6 +49,7 @@ public class RatingService {
 
         Rating rating = new Rating();
         rating.setStoreId(ratingDTO.getStoreId());
+        rating.setProductId(ratingDTO.getProductId());
         rating.setUserId(ratingDTO.getUserId());
         rating.setScore(ratingDTO.getScore());
         rating.setComment(ratingDTO.getComment());
@@ -62,6 +67,7 @@ public class RatingService {
         }
 
         rating.setStoreId(updatedDTO.getStoreId());
+        rating.setProductId(updatedDTO.getProductId());
         rating.setUserId(updatedDTO.getUserId());
         rating.setScore(updatedDTO.getScore());
         rating.setComment(updatedDTO.getComment());

@@ -674,5 +674,21 @@ header .logo {
   background-color: #f8e6ec;
 }
 
+.comment-item {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.comment-user {
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+}
+
+.comment-content {
+  display: flex;
+  justify-content: space-between;
+}
+
 
 
