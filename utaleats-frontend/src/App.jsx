@@ -13,6 +13,8 @@ function App() {
     const [selectedStore, setSelectedStore] = useState(null);
     const [storeProducts, setStoreProducts] = useState([]);
     const [cart, setCart] = useState([]);
+    const [showStarSelector, setShowStarSelector] = useState(false);
+    const [selectedStars, setSelectedStars] = useState("⭐");
 
     const [showAddedMessage, setShowAddedMessage] = useState(false);
     const triggerAddedMessage = () => {
@@ -20,6 +22,23 @@ function App() {
         setTimeout(() => setShowAddedMessage(false), 2000);
     };
     const [orderMessage, setOrderMessage] = useState(null);
+
+    const handleStarSelect = (stars) => {
+        setSelectedStars(`${stars}⭐`);
+        setShowStarSelector(false);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const target = event.target;
+            if (!target.closest(".agregar-star") && !target.closest(".comment-star-button")) {
+                setShowStarSelector(false);
+            }
+        };
+
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
+    }, []);
 
     const [showComments, setShowComments] = useState(false);
     const [selectedProductForComments, setSelectedProductForComments] = useState(null);
@@ -124,13 +143,11 @@ function App() {
             });
     }, []);
 
-
     return (
         <div className="app-container">
             <header>
                 <img src="/utal_eats_logo.png" alt="Utal Eats Logo" className="logo"/>
             </header>
-
 
             <section className="recommendations">
                 <h2>Recomendaciones para ti</h2>
@@ -143,7 +160,6 @@ function App() {
                     ))}
                 </div>
             </section>
-
 
             <div className="contenedor-transparente">
                 {/* Botón fijo flotante del carrito */}
@@ -184,51 +200,19 @@ function App() {
                 </div>
             </div>
 
-                {selectedStore && (
-                    <div className="store-overlay">
-                        <div className="store-header">
-                            <button className="close-store-button" onClick={() => setSelectedStore(null)}>←</button>
-                            <h2>{selectedStore.name}</h2>
-                        </div>
-                        <div className="product-list">
-                            {storeProducts.map((product, idx) => (
-                                <div key={idx} className="product-card">
-                                    <img src={product.imageUrl} alt={product.name}/>
-                                    <div className="product-info">
-                                        <h4>{product.name}</h4>
-                                        <p>${product.price.toFixed(2)}</p>
-                                    </div>
-                                    <button
-                                        className="add-to-cart-button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            const btn = e.currentTarget;
-                                            btn.classList.add('clicked');
-                                            setTimeout(() => btn.classList.remove('clicked'), 500);
-
-                                            addToCart(product, selectedStore.id);  // Agregar al carrito
-                                            triggerAddedMessage(); // Mostrar mensaje emergente
-                                        }}
-                                    >
-                                        +
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+            {selectedStore && (
+                <div className="store-overlay">
+                    <div className="store-header">
+                        <button className="close-store-button" onClick={() => setSelectedStore(null)}>←</button>
+                        <h2>{selectedStore.name}</h2>
                     </div>
-                )}
-
-                {/* Tiendas */}
-                <section className="stores">
-                    <h2>Tiendas disponibles</h2>
-                    <div className="stores-list">
-                        {stores.map((store) => (
-                            <div key={store.id} className="store-card" onClick={() => openStoreView(store)}>
-                                <img src={`http://localhost:8080/${store.imageUrl}`} alt={store.name}/>
-                                <div className="store-info">
-                                    <h3>{store.name}</h3>
-                                    <p>{store.category} • {store.city}</p>
-                                    <p>⭐ {store.rating}</p>
+                    <div className="product-list">
+                        {storeProducts.map((product, idx) => (
+                            <div key={idx} className="product-card">
+                                <img src={product.imageUrl} alt={product.name}/>
+                                <div className="product-info">
+                                    <h4>{product.name}</h4>
+                                    <p>${product.price.toFixed(2)}</p>
                                 </div>
                                 <div className="product-actions">
                                     {/* Botón de comentario */}
@@ -242,7 +226,7 @@ function App() {
                                             openCommentsForProduct(product);
                                         }}
                                     >
-                                        <img src="/comentario.png" alt="Comentarios" />
+                                        💬
                                     </button>
 
                                     {/* Botón + para agregar al carrito */}
@@ -283,11 +267,31 @@ function App() {
                     <button className="comment-send-button">
                         📤
                     </button>
-                    <button className="comment-star-button">
-                        ⭐
-                    </button>
+                    <div className="star-container">
+                        <button
+                            className="comment-star-button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowStarSelector((prev) => !prev);
+                            }}
+                        >
+                            {selectedStars}
+                        </button>
+
+                        {showStarSelector && (
+                            <div className="agregar-star">
+                                {[1, 2, 3, 4, 5].map((n) => (
+                                    <div key={n} onClick={() => handleStarSelect(n)} className="star-option">
+                                        {n}⭐
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                 </div>
             </div>
+
             {/* Tiendas */}
             <section className="stores">
                 <h2>Tiendas disponibles</h2>
@@ -305,22 +309,22 @@ function App() {
                 </div>
             </section>
 
-                {showAddedMessage && (
-                    <div className="added-to-cart-message">
-                        ¡Agregado al Carrito!
-                    </div>
-                )}
+            {showAddedMessage && (
+                <div className="added-to-cart-message">
+                    ¡Agregado al Carrito!
+                </div>
+            )}
 
-                {orderMessage && (
-                    <div className="order-message">
-                        {orderMessage.split('\n').map((line, idx) => (
-                            <p key={idx}>{line}</p>
-                        ))}
-                    </div>
-                )}
+            {orderMessage && (
+                <div className="order-message">
+                    {orderMessage.split('\n').map((line, idx) => (
+                        <p key={idx}>{line}</p>
+                    ))}
+                </div>
+            )}
 
-            </div>
-            );
-            }
+        </div>
+    );
+}
 export default App;
 
