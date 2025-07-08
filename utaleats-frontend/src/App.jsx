@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import pizzaImage from './assets/pizza.png';
+import sushiImage from './assets/sushi.png';
+import burguerImage from './assets/burger.png';
+import saladImage from './assets/salad.png';
+import postresImage from './assets/postres.png';
 import './App.css';
 
 function App() {
@@ -100,89 +105,130 @@ function App() {
     };
 
     const recommendations = [
-        { id: 1, title: "Pizza", image: "https://via.placeholder.com/120?text=Pizza" },
-        { id: 2, title: "Sushi", image: "https://via.placeholder.com/120?text=Sushi" },
-        { id: 3, title: "Hamburguesa", image: "https://via.placeholder.com/120?text=Hamburguesa" },
-        { id: 4, title: "Ensaladas", image: "https://via.placeholder.com/120?text=Ensaladas" },
-        { id: 5, title: "Postres", image: "https://via.placeholder.com/120?text=Postres" },
+        { id: 1, title: "Pizza", image: pizzaImage },
+        { id: 2, title: "Sushi", image: sushiImage },
+        { id: 3, title: "Hamburguesa", image: burguerImage },
+        { id: 4, title: "Ensaladas", image: saladImage },
+        { id: 5, title: "Postres", image: postresImage },
     ];
 
+    // Simulación carga tiendas
     useEffect(() => {
         axios.get("http://localhost:8080/store")
             .then((response) => {
                 setStores(response.data);
+                console.log("Tiendas obtenidas:", response.data); // DEBUG
             })
             .catch((error) => {
                 console.error("Error al obtener tiendas:", error);
             });
     }, []);
 
+
     return (
         <div className="app-container">
             <header>
-                <img src="/utal_eats_logo.png" alt="Utal Eats Logo" className="logo" />
+                <img src="/utal_eats_logo.png" alt="Utal Eats Logo" className="logo"/>
             </header>
+
 
             <section className="recommendations">
                 <h2>Recomendaciones para ti</h2>
                 <div className="recommendations-list">
                     {recommendations.map((rec) => (
                         <div key={rec.id} className="rec-item">
-                            <img src={rec.image} alt={rec.title} />
+                            <img src={rec.image} alt={rec.title}/>
                             <p>{rec.title}</p>
                         </div>
                     ))}
                 </div>
             </section>
 
-            {/* Botón fijo flotante del carrito */}
-            <div className="cart-button" onClick={() => setCartOpen(!cartOpen)}>
-                <img src="/carrito.png" alt="Carrito" />
-            </div>
 
-            {cartOpen && <div className="backdrop" onClick={() => setCartOpen(false)}></div>}
-
-            <div className={`cart-overlay ${cartOpen ? 'open' : ''}`}>
-                <div className="cart-header">
-                    <button className="close-cart-button" onClick={() => setCartOpen(false)}>←</button>
-                    <h2>Carrito</h2>
+            <div className="contenedor-transparente">
+                {/* Botón fijo flotante del carrito */}
+                <div className="cart-button" onClick={() => setCartOpen(!cartOpen)}>
+                    <img src="/carrito.png" alt="Carrito"/>
                 </div>
 
-                {/* 🛒 Contenido del carrito */}
-                <div className="cart-content">
-                    {cart.length === 0 ? (
-                        <p className="cart-empty">Tu carrito está vacío.</p>
-                    ) : (
-                        <>
-                            {cart.map((item, index) => (
-                                <div key={index} className="cart-item">
-                                    <p>{item.name} x{item.quantity}</p>
-                                    <p>${(item.price * item.quantity).toFixed(2)}</p>
+                {cartOpen && <div className="backdrop" onClick={() => setCartOpen(false)}></div>}
+
+                <div className={`cart-overlay ${cartOpen ? 'open' : ''}`}>
+                    <div className="cart-header">
+                        <button className="close-cart-button" onClick={() => setCartOpen(false)}>←</button>
+                        <h2>Carrito</h2>
+                    </div>
+
+                    {/* 🛒 Contenido del carrito */}
+                    <div className="cart-content">
+                        {cart.length === 0 ? (
+                            <p className="cart-empty">Tu carrito está vacío.</p>
+                        ) : (
+                            <>
+                                {cart.map((item, index) => (
+                                    <div key={index} className="cart-item">
+                                        <p>{item.name} x{item.quantity}</p>
+                                        <p>${(item.price * item.quantity).toFixed(2)}</p>
+                                    </div>
+                                ))}
+                                <hr className="cart-separator"/>
+                                <p className="cart-total">
+                                    <strong>Total:</strong> ${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
+                                </p>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Botón comprar */}
+                    <button className="buy-button" onClick={handleComprar}>Comprar</button>
+                </div>
+            </div>
+
+                {selectedStore && (
+                    <div className="store-overlay">
+                        <div className="store-header">
+                            <button className="close-store-button" onClick={() => setSelectedStore(null)}>←</button>
+                            <h2>{selectedStore.name}</h2>
+                        </div>
+                        <div className="product-list">
+                            {storeProducts.map((product, idx) => (
+                                <div key={idx} className="product-card">
+                                    <img src={product.imageUrl} alt={product.name}/>
+                                    <div className="product-info">
+                                        <h4>{product.name}</h4>
+                                        <p>${product.price.toFixed(2)}</p>
+                                    </div>
+                                    <button
+                                        className="add-to-cart-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const btn = e.currentTarget;
+                                            btn.classList.add('clicked');
+                                            setTimeout(() => btn.classList.remove('clicked'), 500);
+
+                                            addToCart(product, selectedStore.id);  // Agregar al carrito
+                                            triggerAddedMessage(); // Mostrar mensaje emergente
+                                        }}
+                                    >
+                                        +
+                                    </button>
                                 </div>
                             ))}
-                            <hr className="cart-separator" />
-                            <p className="cart-total"><strong>Total:</strong> ${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</p>
-                        </>
-                    )}
-                </div>
-
-                {/* Botón comprar */}
-                <button className="buy-button" onClick={handleComprar}>Comprar</button>
-            </div>
-
-            {selectedStore && (
-                <div className="store-overlay">
-                    <div className="store-header">
-                        <button className="close-store-button" onClick={() => setSelectedStore(null)}>←</button>
-                        <h2>{selectedStore.name}</h2>
+                        </div>
                     </div>
-                    <div className="product-list">
-                        {storeProducts.map((product, idx) => (
-                            <div key={idx} className="product-card">
-                                <img src={product.imageUrl} alt={product.name} />
-                                <div className="product-info">
-                                    <h4>{product.name}</h4>
-                                    <p>${product.price.toFixed(2)}</p>
+                )}
+
+                {/* Tiendas */}
+                <section className="stores">
+                    <h2>Tiendas disponibles</h2>
+                    <div className="stores-list">
+                        {stores.map((store) => (
+                            <div key={store.id} className="store-card" onClick={() => openStoreView(store)}>
+                                <img src={`http://localhost:8080/${store.imageUrl}`} alt={store.name}/>
+                                <div className="store-info">
+                                    <h3>{store.name}</h3>
+                                    <p>{store.category} • {store.city}</p>
+                                    <p>⭐ {store.rating}</p>
                                 </div>
                                 <div className="product-actions">
                                     {/* Botón de comentario */}
@@ -259,22 +305,22 @@ function App() {
                 </div>
             </section>
 
-            {showAddedMessage && (
-                <div className="added-to-cart-message">
-                    ¡Agregado al Carrito!
-                </div>
-            )}
+                {showAddedMessage && (
+                    <div className="added-to-cart-message">
+                        ¡Agregado al Carrito!
+                    </div>
+                )}
 
-            {orderMessage && (
-                <div className="order-message">
-                    {orderMessage.split('\n').map((line, idx) => (
-                        <p key={idx}>{line}</p>
-                    ))}
-                </div>
-            )}
+                {orderMessage && (
+                    <div className="order-message">
+                        {orderMessage.split('\n').map((line, idx) => (
+                            <p key={idx}>{line}</p>
+                        ))}
+                    </div>
+                )}
 
-        </div>
-    );
-}
-
+            </div>
+            );
+            }
 export default App;
+

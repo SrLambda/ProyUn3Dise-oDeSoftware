@@ -17,9 +17,11 @@ header .logo {
 /* Recomendaciones */
 .recommendations h2 {
   margin-bottom: 0.5rem;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem;
-  color: #005f48; /* verde oscuro */
+  font-family: 'Tahoma', sans-serif;
+  font-size: 1.7rem;
+  color: white; /* verde oscuro */
+  font-weight: bolder;
+  -webkit-text-stroke: 1.5px #005f48;
 }
 
 .recommendations-list {
@@ -42,7 +44,7 @@ header .logo {
 
 .rec-item {
   flex: 0 0 auto;
-  width: 120px;
+  width: 130px;
   background: white;
   color: black;
   border-radius: 12px;
@@ -69,9 +71,12 @@ header .logo {
 .stores h2 {
   margin-top: 2rem;
   margin-bottom: 1rem;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem;
-  color: #005f48;
+  font-size: 1.75rem;
+  border: #005f48;
+  font-weight: bolder;
+  font-family: 'Tahoma', sans-serif;
+  color: white; /* verde oscuro */
+  -webkit-text-stroke: 1.6px #005f48;
 }
 
 .stores-list {
@@ -154,8 +159,8 @@ header .logo {
   position: fixed;
   top: 100px;
   right: 100px;
-  width: 60px;
-  height: 60px;
+  width: 90px;
+  height: 90px;
   background: #760e32;
   border: 2px solid #005f48;
   border-radius: 12px;
@@ -166,6 +171,12 @@ header .logo {
   justify-content: center;
   align-items: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contenedor-transparente {
+  background-color: transparent;
+  width: 20px;
+  height: 1px;
 }
 
 .cart-button:hover {
