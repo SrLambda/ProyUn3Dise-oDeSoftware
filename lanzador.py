@@ -5,65 +5,83 @@ import time
 import webbrowser
 
 
-def run_in_new_terminal(command: str):
+def run_in_new_terminal(directory: str, command: str):
     """
-    Runs a command in a new, separate terminal window.
-    This is perfect for monitoring server logs.
+    Builds the OS-specific command and runs it in a new terminal.
+    - Windows: Uses PowerShell with ';' to chain commands.
+    - Linux/macOS: Uses bash with '&&' to chain commands.
     """
-    try:
-        if sys.platform == "win32":
-            # For Windows: The /k flag keeps the window open
-            subprocess.run(f'start powershell -NoExit -Command "{command}"', shell=True)
-        elif sys.platform == "darwin":
-            # For macOS: Launches a new Terminal instance
-            subprocess.run(
-                ["open", "-a", "Terminal.app", "-n", "--args", "bash", "-c", command]
-            )
-        else:
-            # For Linux (e.g., Ubuntu with GNOME Terminal)
-            # You might need to change 'gnome-terminal' to your terminal (e.g., 'konsole', 'xterm')
-            subprocess.run(["kitty", "--", "bash", "-c", command])
-    except Exception as e:
-        print(f"Error: Failed to open new terminal for command '{command}'. {e}")
-        print(
-            "Please ensure your terminal emulator (e.g., gnome-terminal) is installed."
-        )
+    # Build the final command string based on the OS
+    if sys.platform == "win32":
+        # PowerShell uses a semicolon ';' to separate commands
+        final_command = f"cd {directory}; {command}"
+        # Use 'start powershell' to launch a new window
+        shell_command = f'start powershell -NoExit -Command "{final_command}"'
+        subprocess.run(shell_command, shell=True)
+    else:
+        # Linux & macOS use '&&' for safer command chaining
+        final_command = f"cd {directory} && {command}"
+        try:
+            if sys.platform == "darwin":  # macOS
+                subprocess.run(
+                    [
+                        "open",
+                        "-a",
+                        "Terminal.app",
+                        "-n",
+                        "--args",
+                        "bash",
+                        "-c",
+                        final_command,
+                    ]
+                )
+            else:  # Linux
+                subprocess.run(
+                    [
+                        "x-terminal-emulator",
+                        "-e",
+                        f'bash -c "{final_command}; exec bash"',
+                    ]
+                )
+        except FileNotFoundError:
+            print("Error: Could not find a terminal to launch.")
 
 
 # --- Main Program ---
 if __name__ == "__main__":
-    # List of commands to start your Spring Boot and npm services
-    # The '&&' ensures the second command runs only if the 'cd' is successful
-    commands_to_run = [
-        "cd orders-service && mvn spring-boot:run",
-        "cd ratings-service && mvn spring-boot:run",
-        "cd stores-service && mvn spring-boot:run",
-        "cd users-service && mvn spring-boot:run",
-        "cd utaleats-frontend && npm start",
+    # Commands are now defined by directory and the process to run
+    services_to_run = [
+        {"dir": "orders-service", "cmd": "mvn spring-boot:run"},
+        {"dir": "ratings-service", "cmd": "mvn spring-boot:run"},
+        {"dir": "stores-service", "cmd": "mvn spring-boot:run"},
+        {"dir": "users-service", "cmd": "mvn spring-boot:run"},
+        {"dir": "utaleats-frontend", "cmd": "npm start"},
     ]
 
     threads = []
 
     print("🚀 Launching 5 services in new terminal windows...")
 
-    for cmd in commands_to_run:
-        thread = threading.Thread(target=run_in_new_terminal, args=(cmd,))
+    for service in services_to_run:
+        # Pass the directory and command separately
+        thread = threading.Thread(
+            target=run_in_new_terminal, args=(service["dir"], service["cmd"])
+        )
         threads.append(thread)
         thread.start()
-        # A small delay to prevent all windows from launching at the exact same instant
         time.sleep(0.5)
 
-    print("✅ All service terminals have been launched.")
-    print("Check the new windows for server logs.")
+    for thread in threads:
+        thread.join()
 
+    print("✅ All service terminals have been launched.")
+
+    # --- Wait 5 seconds and open the browser ---
     try:
         frontend_url = "http://localhost:5173/"
         print(f"\nWaiting 5 seconds before opening the frontend...")
-        time.sleep(10)
+        time.sleep(5)
         print(f"Opening browser at {frontend_url} 🌐")
         webbrowser.open(frontend_url)
     except Exception as e:
         print(f"Could not open web browser: {e}")
-
-    for thread in threads:
-        thread.join()
