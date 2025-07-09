@@ -51,6 +51,12 @@ public class RatingController {
     // Crear nueva calificación
     @PostMapping
     public Rating createRating(@Valid @RequestBody RatingDTO ratingDTO) {
+        System.out.println("📝 Recibiendo comentario:");
+        System.out.println("Store ID: " + ratingDTO.getStoreId());
+        System.out.println("Product ID: " + ratingDTO.getProductId());
+        System.out.println("User ID: " + ratingDTO.getUserId());
+        System.out.println("Score: " + ratingDTO.getScore());
+        System.out.println("Comment: " + ratingDTO.getComment());
         return ratingService.createRating(ratingDTO);
     }
 

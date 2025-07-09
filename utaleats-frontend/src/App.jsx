@@ -46,11 +46,34 @@ function App() {
     const [showComments, setShowComments] = useState(false);
     const [selectedProductForComments, setSelectedProductForComments] = useState(null);
 
-    const closeComments = () => {
+    const closeComments = async () => {
         console.log("🔴 Cerrando panel de comentarios");
         setShowComments(false);
         setSelectedProductForComments(null);
-    }
+
+        // 🔁 Recalcular estrellas de productos
+        if (selectedStore) {
+            const enrichedProducts = await Promise.all((selectedStore.products || []).map(async (product) => {
+                try {
+                    const response = await axios.get(`http://localhost:8082/ratings/product/${product.id}`);
+                    const ratings = response.data;
+                    const avg = ratings.length > 0
+                        ? (ratings.reduce((sum, r) => sum + r.score, 0) / ratings.length).toFixed(1)
+                        : "Sin ratings";
+                    return { ...product, averageRating: avg };
+                } catch (error) {
+                    console.error(`Error al obtener ratings del producto ${product.id}`, error);
+                    return { ...product, averageRating: "Error" };
+                }
+            }));
+
+            setStoreProducts(enrichedProducts);
+        }
+    };
+
+    const vaciarCarrito = () => {
+        setCart([]);
+    };
 
     useEffect(() => {
         console.log("📺 Estado showComments:", showComments);
@@ -69,7 +92,7 @@ function App() {
         console.log("🟢 Abriendo comentarios para", product.name);
         setSelectedProductForComments(product);
         setShowComments(true);
-        fetchComments(product.id);
+        fetchComments(product.id);  // 🔁 Ahora busca por productoId
     };
 
     const addToCart = (product, storeId) => {
@@ -131,9 +154,24 @@ function App() {
         }
     };
 
-    const openStoreView = (store) => {
+    const openStoreView = async (store) => {
         setSelectedStore(store);
-        setStoreProducts(store.products || []);
+
+        const enrichedProducts = await Promise.all((store.products || []).map(async (product) => {
+            try {
+                const response = await axios.get(`http://localhost:8082/ratings/product/${product.id}`);
+                const ratings = response.data;
+                const avg = ratings.length > 0
+                    ? (ratings.reduce((sum, r) => sum + r.score, 0) / ratings.length).toFixed(1)
+                    : "Sin ratings";
+                return { ...product, averageRating: avg };
+            } catch (error) {
+                console.error(`Error al obtener ratings del producto ${product.id}`, error);
+                return { ...product, averageRating: "Error" };
+            }
+        }));
+
+        setStoreProducts(enrichedProducts);
     };
 
     const recommendations = [
@@ -147,9 +185,16 @@ function App() {
     // Simulación carga tiendas
     useEffect(() => {
         axios.get("http://localhost:8080/store")
-            .then((response) => {
-                setStores(response.data);
-                console.log("Tiendas obtenidas:", response.data); // DEBUG
+            .then(async (response) => {
+                const storesWithRatings = await Promise.all(response.data.map(async (store) => {
+                    const ratingsResponse = await axios.get(`http://localhost:8082/ratings/store/${store.id}`);
+                    const ratings = ratingsResponse.data;
+                    const average = ratings.length > 0
+                        ? (ratings.reduce((sum, r) => sum + r.score, 0) / ratings.length).toFixed(1)
+                        : "Sin ratings";
+                    return { ...store, averageRating: average };
+                }));
+                setStores(storesWithRatings);
             })
             .catch((error) => {
                 console.error("Error al obtener tiendas:", error);
@@ -186,6 +231,23 @@ function App() {
         } catch (error) {
             console.error("❌ Error al enviar rating:", error);
             alert("Ocurrió un error al enviar tu calificación.");
+        }
+    };
+
+    const refreshStoresRatings = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/store");
+            const storesWithRatings = await Promise.all(response.data.map(async (store) => {
+                const ratingsResponse = await axios.get(`http://localhost:8082/ratings/store/${store.id}`);
+                const ratings = ratingsResponse.data;
+                const average = ratings.length > 0
+                    ? (ratings.reduce((sum, r) => sum + r.score, 0) / ratings.length).toFixed(1)
+                    : "Sin ratings";
+                return { ...store, averageRating: average };
+            }));
+            setStores(storesWithRatings);
+        } catch (error) {
+            console.error("Error al actualizar ratings de tiendas:", error);
         }
     };
 
@@ -242,23 +304,37 @@ function App() {
                     </div>
 
                     {/* Botón comprar */}
-                    <button className="buy-button" onClick={handleComprar}>Comprar</button>
+                    <div className="cart-actions">
+                        <button className="buy-button" onClick={handleComprar}>Comprar</button>
+                        <button className="empty-cart-button" onClick={vaciarCarrito} title="Vaciar carrito">🗑</button>
+                    </div>
                 </div>
             </div>
 
             {selectedStore && (
                 <div className="store-overlay">
                     <div className="store-header">
-                        <button className="close-store-button" onClick={() => setSelectedStore(null)}>←</button>
+                        <button className="close-store-button" onClick={async () => {
+                            setSelectedStore(null);
+                            await refreshStoresRatings(); // 🔁 actualizar estrellas al cerrar
+                        }}>←</button>
                         <h2>{selectedStore.name}</h2>
                     </div>
                     <div className="product-list">
                         {storeProducts.map((product, idx) => (
                             <div key={idx} className="product-card">
-                                <img src={product.imageUrl} alt={product.name}/>
+                                <img
+                                    src={`http://localhost:8080/${product.imageUrl}`}
+                                    alt={product.name}
+                                    onError={(e) => {
+                                    console.error(`❌ Error al cargar imagen del producto: ${product.name} (${product.imageUrl})`);
+                                    console.log(`http://localhost:8080/${product.imageUrl}`);
+                                }}
+                                    />
                                 <div className="product-info">
                                     <h4>{product.name}</h4>
                                     <p>${product.price.toFixed(2)}</p>
+                                    <p className="product-rating">⭐ {product.averageRating}</p>
                                 </div>
                                 <div className="product-actions">
                                     {/* Botón de comentario */}
@@ -387,7 +463,7 @@ function App() {
                             <div className="store-info">
                                 <h3>{store.name}</h3>
                                 <p>{store.category} • {store.city}</p>
-                                <p>⭐ {store.rating}</p>
+                                <p>⭐ {store.averageRating}</p>
                             </div>
                         </div>
                     ))}

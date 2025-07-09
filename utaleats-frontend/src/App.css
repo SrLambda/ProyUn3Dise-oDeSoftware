@@ -690,5 +690,45 @@ header .logo {
   justify-content: space-between;
 }
 
+.product-info p {
+  margin: 0.3rem 0 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.product-rating {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #ffbf00; /* color amarillo estrella */
+  margin-top: 0.2rem;
+}
+
+.cart-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0 1rem;
+}
+
+.empty-cart-button {
+  background-color: #005f48;
+  border: none;
+  color: white;
+  /*padding: 10px;*/
+  height: 42px; /* Igual que el buy-button (padding 10px ≈ altura de 42px) */
+  width: 42px;
+  /*width: 10px;*/
+  border-radius: 6px;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.empty-cart-button:hover {
+  background-color: #760e32;
+}
 
 
