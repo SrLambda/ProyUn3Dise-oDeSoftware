@@ -18,6 +18,17 @@ function App() {
     const [commentText, setCommentText] = useState("");
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
+    const [userPanelOpen, setUserPanelOpen] = useState(false);
+    const [showLogin, setShowLogin] = useState(false);
+    const [showRegister, setShowRegister] = useState(false);
+    const [regEmail, setRegEmail] = useState("");
+    const [regPass, setRegPass] = useState("");
+    const [regNombre, setRegNombre] = useState("");
+    const [regDireccion, setRegDireccion] = useState("");
+    const [regTelefono, setRegTelefono] = useState("");
+    const [loginEmail, setLoginEmail] = useState("");
+    const [loginPass, setLoginPass] = useState("");
+    const [usuarioActivo, setUsuarioActivo] = useState(null);
 
     const [showAddedMessage, setShowAddedMessage] = useState(false);
     const triggerAddedMessage = () => {
@@ -78,6 +89,16 @@ function App() {
     useEffect(() => {
         console.log("📺 Estado showComments:", showComments);
     }, [showComments]);
+
+    useEffect(() => {
+        axios.get("http://localhost:8083/api/users")
+            .then(response => {
+                console.log("Usuarios cargados:", response.data);
+            })
+            .catch(error => {
+                console.error("Error al obtener usuarios:", error);
+            });
+    }, []);
 
     const fetchComments = async (productId) => {
         try {
@@ -201,6 +222,57 @@ function App() {
             });
     }, []);
 
+    const handleLogin = async () => {
+        try {
+            const response = await axios.post("http://localhost:8083/api/users/login", {
+                correo: loginEmail,
+                contrasena: loginPass
+            });
+            alert("Sesión iniciada como: " + response.data.correo);
+
+            // Guardar el usuario activo (puedes guardar el perfil también)
+            setUsuarioActivo(response.data);  // o response.data.perfil si prefieres
+
+            // Limpiar campos
+            setLoginEmail("");
+            setLoginPass("");
+            setShowLogin(false);
+            setUserPanelOpen(false);
+        } catch (err) {
+            alert("Credenciales incorrectas.");
+        }
+    };
+
+    const handleRegister = async () => {
+        try {
+            const cuentaResponse = await axios.post("http://localhost:8083/api/users/register", {
+                correo: regEmail,
+                contrasena: regPass
+            });
+
+            const cuentaId = cuentaResponse.data.id;
+
+            await axios.post(`http://localhost:8083/api/users/${cuentaId}/profile`, {
+                nombre: regNombre,
+                direccion: regDireccion,
+                telefono: regTelefono
+            });
+
+            alert("¡Cuenta registrada con éxito!");
+
+            // Limpiar campos
+            setRegEmail("");
+            setRegPass("");
+            setRegNombre("");
+            setRegDireccion("");
+            setRegTelefono("");
+            setShowRegister(false);
+            setUserPanelOpen(false);
+        } catch (err) {
+            alert("Error al registrar: " + (err.response?.data?.correo || "Error desconocido"));
+        }
+    };
+
     const handleEnviarRating = async () => {
         if (!selectedProductForComments || !selectedStore) {
             alert("Error: producto o tienda no seleccionados");
@@ -270,12 +342,107 @@ function App() {
             </section>
 
             <div className="contenedor-transparente">
-                {/* Botón fijo flotante del carrito */}
-                <div className="cart-button" onClick={() => setCartOpen(!cartOpen)}>
-                    <img src="/carrito.png" alt="Carrito"/>
+                {/* Botón fijo flotante del usuario */}
+                {/* Botón flotante del usuario */}
+                <div className="user-button" onClick={() => setUserPanelOpen(!userPanelOpen)}>
+                    <div className="user-icon">👤</div>
+                    {usuarioActivo?.perfil?.nombre && (
+                        <div className="user-name">{usuarioActivo.perfil.nombre}</div>
+                    )}
                 </div>
 
-                {cartOpen && <div className="backdrop" onClick={() => setCartOpen(false)}></div>}
+                {/* Fondo oscuro para cerrar el panel al hacer clic fuera */}
+                {userPanelOpen && <div className="backdrop" onClick={() => {
+                    setUserPanelOpen(false);
+                    setShowLogin(false);
+                    setShowRegister(false);
+                }}></div>}
+
+                {/* Botón fijo flotante del carrito */}
+                <div className="cart-button" onClick={() => setCartOpen(!cartOpen)}>
+                    🛒
+                </div>
+
+                {userPanelOpen && (
+                    <div className="backdrop" onClick={() => {
+                        setUserPanelOpen(false);
+                        setShowLogin(false);
+                        setShowRegister(false);
+                    }}>
+                        <div
+                            className={`user-overlay ${userPanelOpen ? 'open' : ''}`}
+                            onClick={(e) => e.stopPropagation()} // ⛔ Evita que el clic dentro del panel cierre todo
+                        >
+                            <div className="user-header">
+                                {(showLogin || showRegister) ? (
+                                    <button
+                                        className="close-user-button"
+                                        onClick={() => {
+                                            setShowLogin(false);
+                                            setShowRegister(false);
+                                            setLoginEmail("");
+                                            setLoginPass("");
+                                            setRegEmail("");
+                                            setRegPass("");
+                                            setRegNombre("");
+                                            setRegDireccion("");
+                                            setRegTelefono("");
+                                        }}
+                                    >
+                                        ←
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="close-user-button"
+                                        onClick={() => {
+                                            setUserPanelOpen(false);
+                                            setLoginEmail("");
+                                            setLoginPass("");
+                                            setRegEmail("");
+                                            setRegPass("");
+                                            setRegNombre("");
+                                            setRegDireccion("");
+                                            setRegTelefono("");
+                                        }}
+                                    >
+                                        ←
+                                    </button>
+                                )}
+                                <h2>
+                                    {showLogin ? "Iniciar Sesión" : showRegister ? "Registrarse" : "Usuario"}
+                                </h2>
+                            </div>
+
+                            <div className="user-content">
+                                {!showLogin && !showRegister && (
+                                    <>
+                                        <button onClick={() => { setShowLogin(true); setShowRegister(false); }}>Iniciar Sesión</button>
+                                        <button onClick={() => { setShowRegister(true); setShowLogin(false); }}>Registrarse</button>
+                                    </>
+                                )}
+
+                                {showLogin && (
+                                    <>
+                                        <input type="email" placeholder="Correo" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
+                                        <input type="password" placeholder="Contraseña" value={loginPass} onChange={e => setLoginPass(e.target.value)} />
+                                        <button onClick={handleLogin}>Entrar</button>
+                                    </>
+                                )}
+
+                                {showRegister && (
+                                    <>
+                                        <input type="email" placeholder="Correo" value={regEmail} onChange={e => setRegEmail(e.target.value)} />
+                                        <input type="password" placeholder="Contraseña" value={regPass} onChange={e => setRegPass(e.target.value)} />
+                                        <input type="text" placeholder="Nombre" value={regNombre} onChange={e => setRegNombre(e.target.value)} />
+                                        <input type="text" placeholder="Dirección" value={regDireccion} onChange={e => setRegDireccion(e.target.value)} />
+                                        <input type="number" placeholder="Teléfono" value={regTelefono} onChange={e => setRegTelefono(e.target.value)} />
+                                        <button onClick={handleRegister}>Registrar</button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className={`cart-overlay ${cartOpen ? 'open' : ''}`}>
                     <div className="cart-header">
