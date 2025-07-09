@@ -14,9 +14,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long storeId;
+    private Long userId;
 
-    private String customerName;
+    private Long storeId;
 
     private LocalDateTime orderDate;
 
@@ -30,9 +30,9 @@ public class Order {
 
     public Order() {}
 
-    public Order(Long storeId, String customerName, LocalDateTime orderDate, double totalAmount) {
+    public Order(Long storeId, Long userId, LocalDateTime orderDate, double totalAmount) {
         this.storeId = storeId;
-        this.customerName = customerName;
+        this.userId = userId;
         this.orderDate = orderDate;
         this.totalAmount = totalAmount;
     }
@@ -50,9 +50,7 @@ public class Order {
         return storeId;
     }
 
-    public String getCustomerName() {
-        return customerName;
-    }
+    public Long getUserId() {return userId; }
 
     public LocalDateTime getOrderDate() {
         return orderDate;
@@ -78,9 +76,7 @@ public class Order {
         this.storeId = storeId;
     }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
+    public void setUserId(Long userId) {this.userId = userId;}
 
     public void setOrderDate(LocalDateTime orderDate) {
         this.orderDate = orderDate;
