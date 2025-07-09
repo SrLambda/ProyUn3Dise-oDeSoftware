@@ -38,7 +38,7 @@ def run_in_new_terminal(directory: str, command: str):
             else:  # Linux
                 subprocess.run(
                     [
-                        "x-terminal-emulator",
+                        "kitty",
                         "-e",
                         f'bash -c "{final_command}; exec bash"',
                     ]
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     try:
         frontend_url = "http://localhost:5173/"
         print(f"\nWaiting 5 seconds before opening the frontend...")
-        time.sleep(5)
+        time.sleep(10)
         print(f"Opening browser at {frontend_url} 🌐")
         webbrowser.open(frontend_url)
     except Exception as e:
