@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/users") // Una URL base común y limpia para el microservicio de usuarios
 @CrossOrigin(origins = "*") // Permite peticiones desde cualquier origen (Frontend)
@@ -67,8 +70,6 @@ public class UserController {
                 })
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new CuentaResponseDTO(null, "Credenciales inválidas", null)));
     }
-
-    // --- Endpoints para la Gestión de Cuentas ---
 
     /**
      * Obtiene los detalles de una cuenta por su ID.
@@ -169,5 +170,15 @@ public class UserController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping // Este endpoint responderá a GET /api/users
+    public ResponseEntity<List<CuentaResponseDTO>> getAllUsers() {
+        List<Cuenta> cuentas = userService.getAllCuentas();
+        // Mapea las cuentas a CuentaResponseDTOs (omitiendo contraseñas, etc.)
+        List<CuentaResponseDTO> responseDTOs = cuentas.stream()
+                .map(cuenta -> new CuentaResponseDTO(cuenta.getId(), cuenta.getCorreo(), cuenta.getPerfil()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDTOs);
     }
 }

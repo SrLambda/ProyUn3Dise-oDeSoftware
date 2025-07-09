@@ -9,6 +9,7 @@ import cl.utalca.utaleats.usersservice.repository.PerfilRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Importar para transacciones
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -149,5 +150,9 @@ public class UserService {
     public void eliminarCuenta(Long id) {
         // Debido a CascadeType.ALL en la relación OneToOne, el perfil asociado también se eliminará.
         cuentaRepository.deleteById(id);
+    }
+
+    public List<Cuenta> getAllCuentas() {
+        return cuentaRepository.findAll();
     }
 }
