@@ -1,0 +1,9 @@
+cl\utalca\utaleats\usersservice\model\User.class
+cl\utalca\utaleats\usersservice\dto\UserDTO.class
+cl\utalca\utaleats\usersservice\controller\UserController.class
+cl\utalca\utaleats\usersservice\service\UserService.class
+cl\utalca\utaleats\usersservice\UsersServiceApplication.class
+cl\utalca\utaleats\usersservice\exception\GlobalExceptionHandler.class
+cl\utalca\utaleats\usersservice\exception\ResourceNotFoundException.class
+cl\utalca\utaleats\usersservice\exception\DuplicateResourceException.class
+cl\utalca\utaleats\usersservice\repository\UserRepository.class

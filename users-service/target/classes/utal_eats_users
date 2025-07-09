@@ -1,0 +1,10 @@
+-- users-service/src/main/resources/data.sql
+
+INSERT INTO user (id, username, email, password) VALUES
+(1, 'john.doe', 'john.doe@example.com', 'password123'),
+(2, 'jane.smith', 'jane.smith@example.com', 'securepass'),
+(3, 'admin', 'admin@utalca.cl', 'adminpass');
+
+-- Asegúrate de que el ID sea el siguiente disponible para los nuevos registros
+-- Esto puede variar ligeramente dependiendo de tu dialecto SQL o si usas IDENTITY
+ALTER SEQUENCE user_seq RESTART WITH 4; -- Si usas secuencias (no para IDENTITY con H2)
