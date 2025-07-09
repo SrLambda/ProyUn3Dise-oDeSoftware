@@ -50,6 +50,4 @@ public class StoreController {
     public void deleteStore(@PathVariable Long id) {
         storeService.deleteStore(id);
     }
-
 }
-
