@@ -655,6 +655,7 @@ header .logo {
 }
 
 
+
 /* --- NUEVOS ESTILOS PARA MODALES DE AUTENTICACIÓN --- */
 
 .modal {
@@ -754,9 +755,10 @@ header .logo {
   align-items: center;
 }
 .auth-buttons button {
-  background-color: #007bff;
+  background-color: #005f48;
+  border-color: #3B061A;
   color: white;
-  border: none;
+  border-width: 7px;
   padding: 8px 15px;
   text-align: center;
   text-decoration: none;
@@ -767,7 +769,8 @@ header .logo {
   transition: background-color 0.3s ease;
 }
 .auth-buttons button:hover {
-  background-color: #0056b3;
+  background-color: #760e32;
+  border-color: #005f48;
 }
 
 /* Ajustes para el header si es necesario para acomodar los botones */

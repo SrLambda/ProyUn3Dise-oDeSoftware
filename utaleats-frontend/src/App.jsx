@@ -5,7 +5,7 @@ import sushiImage from './assets/sushi.png';
 import burguerImage from './assets/burger.png';
 import saladImage from './assets/salad.png';
 import postresImage from './assets/postres.png';
-import './App.css'; // Asegúrate de que este CSS contiene los estilos de los modales
+import './App.css'; // Asegúrate de que este CSS contiene los estilos de los modales y el resto de la app
 
 function App() {
     const [stores, setStores] = useState([]);
@@ -16,18 +16,19 @@ function App() {
     const [showAddedMessage, setShowAddedMessage] = useState(false);
     const [orderMessage, setOrderMessage] = useState(null);
 
-    // --- NUEVOS ESTADOS PARA AUTENTICACIÓN ---
+    // --- ESTADOS PARA AUTENTICACIÓN ---
     const [loginModalOpen, setLoginModalOpen] = useState(false);
     const [registerModalOpen, setRegisterModalOpen] = useState(false);
     const [loginMessage, setLoginMessage] = useState('');
     const [registerMessage, setRegisterMessage] = useState('');
     const [loggedInUser, setLoggedInUser] = useState(null); // {id: ..., username: ..., email: ...}
 
-    // URL base de tu microservicio de usuarios (asegúrate que sea correcta)
-    const USER_SERVICE_URL = 'http://localhost:8080/api/users'; // Por defecto, users-service en 8080.
+    // URL base de tus microservicios
+    const USER_SERVICE_URL = 'http://localhost:8080/api/users'; // users-service
+    const STORE_SERVICE_BASE_URL = "http://localhost:8080"; // stores-service
+    const ORDERS_SERVICE_URL = "http://localhost:8081"; // orders-service
 
-
-    // --- FUNCIONES EXISTENTES ---
+    // --- FUNCIONES DE LÓGICA DE NEGOCIO EXISTENTES (Carrito, Tiendas) ---
     const triggerAddedMessage = () => {
         setShowAddedMessage(true);
         setTimeout(() => setShowAddedMessage(false), 2000);
@@ -54,7 +55,8 @@ function App() {
 
     const handleComprar = async () => {
         if (cart.length === 0) {
-            alert("Tu carrito está vacío.");
+            setOrderMessage("Tu carrito está vacío.");
+            setTimeout(() => setOrderMessage(null), 3000);
             return;
         }
         if (!loggedInUser) {
@@ -63,7 +65,6 @@ function App() {
             return;
         }
 
-
         const storeId = cart[0].storeId; // asumimos que todos los productos son de la misma tienda
         const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -71,7 +72,7 @@ function App() {
             accountId: loggedInUser.id, // Usar el ID del usuario logueado
             storeId: storeId,
             totalAmount: totalAmount,
-            orderDate: new Date().toISOString(), // opcional
+            orderDate: new Date().toISOString(),
             items: cart.map(item => ({
                 productId: item.productId,
                 quantity: item.quantity,
@@ -80,14 +81,13 @@ function App() {
         };
 
         try {
-            // Asegúrate de que el orders-service esté en el puerto 8081
-            const response = await axios.post("http://localhost:8081/orders", order);
+            const response = await axios.post(`${ORDERS_SERVICE_URL}/orders`, order);
             setOrderMessage(`Pedido Realizado\nID pedido: ${response.data.id}`);
             setCart([]); // Vaciar carrito
             setTimeout(() => {
-                setOrderMessage(null); // Ocultar mensaje
-                setCartOpen(false);    // Cerrar carrito después del mensaje
-            }, 3000); // 3 segundos visible
+                setOrderMessage(null);
+                setCartOpen(false);
+            }, 3000);
         } catch (error) {
             console.error("Error al realizar pedido:", error);
             setOrderMessage("Hubo un error al procesar el pedido.");
@@ -97,15 +97,13 @@ function App() {
 
     const openStoreView = (store) => {
         setSelectedStore(store);
-        // Aquí deberías hacer una llamada al API para obtener los productos de la tienda
-        // Asumo que tu endpoint para productos es GET /api/products?storeId=X
-        axios.get(`http://localhost:8080/product?storeId=${store.id}`) // Asumiendo que el servicio de tiendas maneja los productos
+        axios.get(`${STORE_SERVICE_BASE_URL}/product?storeId=${store.id}`)
             .then(response => {
                 setStoreProducts(response.data);
             })
             .catch(error => {
                 console.error("Error al obtener productos de la tienda:", error);
-                setStoreProducts([]); // Vaciar si hay error
+                setStoreProducts([]);
             });
     };
 
@@ -117,21 +115,19 @@ function App() {
         { id: 5, title: "Postres", image: postresImage },
     ];
 
-    // Simulación carga tiendas (ajusta la URL si tu servicio de tiendas está en otro puerto)
     useEffect(() => {
-        axios.get("http://localhost:8080/store") // Asumiendo que el servicio de tiendas está en 8080
+        axios.get(`${STORE_SERVICE_BASE_URL}/store`)
             .then((response) => {
                 setStores(response.data);
-                console.log("Tiendas obtenidas:", response.data); // DEBUG
+                console.log("Tiendas obtenidas:", response.data);
             })
             .catch((error) => {
                 console.error("Error al obtener tiendas:", error);
             });
     }, []);
 
-    // --- NUEVAS FUNCIONES PARA AUTENTICACIÓN ---
+    // --- FUNCIONES PARA AUTENTICACIÓN (Integradas directamente en App.jsx) ---
 
-    // Efecto para verificar si el usuario ya está logueado al cargar la página
     useEffect(() => {
         const storedUser = localStorage.getItem('loggedInUser');
         if (storedUser) {
@@ -141,9 +137,7 @@ function App() {
 
     const showMessage = (setter, message, isSuccess) => {
         setter(message);
-        // Podrías añadir clases CSS dinámicamente aquí si tuvieras un elemento <p> con ref
-        // Para este ejemplo, solo el texto y una pequeña pausa
-        setTimeout(() => setter(''), 3000); // Limpiar mensaje después de 3 segundos
+        setTimeout(() => setter(''), 3000);
     };
 
     const handleRegisterSubmit = async (event) => {
@@ -156,16 +150,16 @@ function App() {
             const response = await axios.post(`${USER_SERVICE_URL}/register`, { username, email, password });
             if (response.status === 201) {
                 showMessage(setRegisterMessage, `Usuario "${username}" registrado exitosamente!`, true);
-                event.target.reset(); // Limpiar formulario
+                event.target.reset();
                 setTimeout(() => {
                     setRegisterModalOpen(false);
-                    setLoginModalOpen(true); // Abrir modal de login
+                    setLoginModalOpen(true); // Abrir modal de login después de registro
                     showMessage(setLoginMessage, 'Ahora puedes iniciar sesión.', true);
                 }, 1500);
             }
         } catch (error) {
             console.error('Error durante el registro:', error);
-            const errorMessage = error.response?.data || 'Hubo un problema de conexión al registrar.';
+            const errorMessage = error.response?.data?.message || error.response?.data || 'Hubo un problema de conexión al registrar.';
             showMessage(setRegisterMessage, `Error al registrar: ${errorMessage}`, false);
         }
     };
@@ -189,7 +183,7 @@ function App() {
             }
         } catch (error) {
             console.error('Error durante el login:', error);
-            const errorMessage = error.response?.data || 'Hubo un problema de conexión al iniciar sesión.';
+            const errorMessage = error.response?.data?.message || error.response?.data || 'Hubo un problema de conexión al iniciar sesión.';
             showMessage(setLoginMessage, `Error al iniciar sesión: ${errorMessage}`, false);
         }
     };
@@ -201,19 +195,10 @@ function App() {
         alert('Sesión cerrada.');
     };
 
-
     return (
         <div className="app-container">
             <header>
                 <img src="/utal_eats_logo.png" alt="Utal Eats Logo" className="logo"/>
-                <nav>
-                    <ul>
-                        <li><a href="#">HOME</a></li>
-                        <li><a href="#">MENÚ</a></li>
-                        {loggedInUser && <li><a href="#">HISTORIAL</a></li>} {/* Mostrar solo si está logueado */}
-                        <li><a href="#">CARRITO</a></li>
-                    </ul>
-                </nav>
                 <div className="auth-buttons">
                     {loggedInUser ? (
                         <>
@@ -232,13 +217,13 @@ function App() {
             <main>
                 <h2>Bienvenido a UTAL EATS!</h2>
                 <p>Tu plataforma para pedir comida en la UTAL.</p>
-                <img src="https://via.placeholder.com/600x300?text=Imagen+Principal+Utal+Eats" alt="Imagen principal" style={{ maxWidth: '100%', height: 'auto', marginTop: '20px' }} />
             </main>
 
             <section className="recommendations">
                 <h2>Recomendaciones para ti</h2>
                 <div className="recommendations-list">
                     {recommendations.map((rec) => (
+                        // Asegúrate de que no haya ningún onClick que llame a handleLoginClick aquí
                         <div key={rec.id} className="rec-item">
                             <img src={rec.image} alt={rec.title}/>
                             <p>{rec.title}</p>
@@ -321,7 +306,7 @@ function App() {
                 <div className="stores-list">
                     {stores.map((store) => (
                         <div key={store.id} className="store-card" onClick={() => openStoreView(store)}>
-                            <img src={`http://localhost:8080/${store.imageUrl}`} alt={store.name}/>
+                            <img src={`${STORE_SERVICE_BASE_URL}/${store.imageUrl}`} alt={store.name}/>
                             <div className="store-info">
                                 <h3>{store.name}</h3>
                                 <p>{store.category} • {store.city}</p>
@@ -346,7 +331,7 @@ function App() {
                 </div>
             )}
 
-            {/* --- Modales de autenticación (renderizado condicional) --- */}
+            {/* --- Modales de autenticación (renderizado condicional directamente en App.jsx) --- */}
             {loginModalOpen && (
                 <div id="loginModal" className="modal">
                     <div className="modal-content">
@@ -357,6 +342,9 @@ function App() {
                             <input type="password" id="loginPassword" placeholder="Contraseña" required />
                             <button type="submit">Entrar</button>
                             {loginMessage && <p className={`message ${loginMessage.includes('Bienvenido') ? 'success' : 'error'}`}>{loginMessage}</p>}
+                            <p style={{textAlign: 'center', marginTop: '10px'}}>
+                                ¿No tienes una cuenta? <a href="#" onClick={(e) => { e.preventDefault(); setLoginModalOpen(false); setRegisterModalOpen(true); }} style={{color: '#007bff', textDecoration: 'underline'}}>Regístrate aquí</a>
+                            </p>
                         </form>
                     </div>
                 </div>
@@ -373,6 +361,9 @@ function App() {
                             <input type="password" id="registerPassword" placeholder="Contraseña" required />
                             <button type="submit">Registrar</button>
                             {registerMessage && <p className={`message ${registerMessage.includes('exitosamente') ? 'success' : 'error'}`}>{registerMessage}</p>}
+                            <p style={{textAlign: 'center', marginTop: '10px'}}>
+                                ¿Ya tienes una cuenta? <a href="#" onClick={(e) => { e.preventDefault(); setRegisterModalOpen(false); setLoginModalOpen(true); }} style={{color: '#007bff', textDecoration: 'underline'}}>Inicia sesión aquí</a>
+                            </p>
                         </form>
                     </div>
                 </div>
