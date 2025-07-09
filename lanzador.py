@@ -36,13 +36,8 @@ def run_in_new_terminal(directory: str, command: str):
                     ]
                 )
             else:  # Linux
-                subprocess.run(
-                    [
-                        "kitty",
-                        "-e",
-                        f'bash -c "{final_command}; exec bash"',
-                    ]
-                )
+                subprocess.run(["kitty", "--", "bash", "-c", final_command])
+
         except FileNotFoundError:
             print("Error: Could not find a terminal to launch.")
 
@@ -71,10 +66,7 @@ if __name__ == "__main__":
         thread.start()
         time.sleep(0.5)
 
-    for thread in threads:
-        thread.join()
-
-    print("✅ All service terminals have been launched.")
+        print("✅ All service terminals have been launched.")
 
     # --- Wait 5 seconds and open the browser ---
     try:
@@ -85,3 +77,6 @@ if __name__ == "__main__":
         webbrowser.open(frontend_url)
     except Exception as e:
         print(f"Could not open web browser: {e}")
+
+    for thread in threads:
+        thread.join()
