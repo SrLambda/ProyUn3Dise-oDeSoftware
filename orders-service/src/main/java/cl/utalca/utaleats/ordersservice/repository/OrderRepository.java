@@ -6,8 +6,7 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // Buscar pedidos por nombre del cliente
-    List<Order> findByCustomerName(String customerName);
+    List<Order> findByUserId(Long userId);
 
     // Buscar pedidos por ID de tienda
     List<Order> findByStoreId(Long storeId);

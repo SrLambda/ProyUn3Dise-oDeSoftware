@@ -1,6 +1,7 @@
 package cl.utalca.utaleats.ordersservice.service;
 
 import cl.utalca.utaleats.ordersservice.client.StoreClient;
+import cl.utalca.utaleats.ordersservice.client.UserClient;
 import cl.utalca.utaleats.ordersservice.dto.OrderDTO;
 import cl.utalca.utaleats.ordersservice.dto.OrderItemDTO;
 import cl.utalca.utaleats.ordersservice.exception.ResourceNotFoundException;
@@ -17,10 +18,12 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final StoreClient storeClient;
+    private final UserClient userClient;
 
-    public OrderService(OrderRepository orderRepository, StoreClient storeClient) {
+    public OrderService(OrderRepository orderRepository, StoreClient storeClient, UserClient userClient) {
         this.orderRepository = orderRepository;
         this.storeClient = storeClient;
+        this.userClient = userClient;
     }
 
     public List<Order> getAllOrders() {
@@ -33,12 +36,17 @@ public class OrderService {
     }
 
     public Order createOrder(OrderDTO orderDTO) {
+        // Validación del ID del usuario
+        if (!userClient.userExists(orderDTO.getUserId())) {
+            throw new ResourceNotFoundException("El usuario con ID " + orderDTO.getUserId() + " no existe.");
+        }
+        // Validación de la tienda existente
         if (!storeClient.storeExists(orderDTO.getStoreId())) {
-            throw new ResourceNotFoundException("La tienda con ID " + orderDTO.getStoreId() + " no existe");
+            throw new ResourceNotFoundException("La tienda con ID " + orderDTO.getStoreId() + " no existe.");
         }
 
         Order order = new Order();
-        order.setCustomerName(orderDTO.getCustomerName());
+        order.setUserId(orderDTO.getUserId()); // Asignar el ID del usuario
         order.setStoreId(orderDTO.getStoreId());
         order.setOrderDate(orderDTO.getOrderDate() != null ? orderDTO.getOrderDate() : LocalDateTime.now());
         order.setTotalAmount(orderDTO.getTotalAmount());
@@ -59,11 +67,16 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido con ID " + id + " no encontrado"));
 
+        // Validación del ID del usuario
+        if (!userClient.userExists(updatedOrderDTO.getUserId())) {
+            throw new ResourceNotFoundException("El usuario con ID " + updatedOrderDTO.getUserId() + " no existe.");
+        }
+        // Validación de la tienda existente
         if (!storeClient.storeExists(updatedOrderDTO.getStoreId())) {
-            throw new ResourceNotFoundException("La tienda con ID " + updatedOrderDTO.getStoreId() + " no existe");
+            throw new ResourceNotFoundException("La tienda con ID " + updatedOrderDTO.getStoreId() + " no existe.");
         }
 
-        order.setCustomerName(updatedOrderDTO.getCustomerName());
+        order.setUserId(updatedOrderDTO.getUserId()); // Actualizar el ID del usuario
         order.setStoreId(updatedOrderDTO.getStoreId());
         order.setOrderDate(updatedOrderDTO.getOrderDate() != null ? updatedOrderDTO.getOrderDate() : order.getOrderDate());
         order.setTotalAmount(updatedOrderDTO.getTotalAmount());
@@ -86,5 +99,9 @@ public class OrderService {
             throw new ResourceNotFoundException("No se puede eliminar: el pedido con ID " + id + " no existe");
         }
         orderRepository.deleteById(id);
+    }
+
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
     }
 }

@@ -18,6 +18,17 @@ function App() {
     const [commentText, setCommentText] = useState("");
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
+    const [userPanelOpen, setUserPanelOpen] = useState(false);
+    const [showLogin, setShowLogin] = useState(false);
+    const [showRegister, setShowRegister] = useState(false);
+    const [regEmail, setRegEmail] = useState("");
+    const [regPass, setRegPass] = useState("");
+    const [regNombre, setRegNombre] = useState("");
+    const [regDireccion, setRegDireccion] = useState("");
+    const [regTelefono, setRegTelefono] = useState("");
+    const [loginEmail, setLoginEmail] = useState("");
+    const [loginPass, setLoginPass] = useState("");
+    const [usuarioActivo, setUsuarioActivo] = useState(null);
 
     const [showAddedMessage, setShowAddedMessage] = useState(false);
     const triggerAddedMessage = () => {
@@ -79,10 +90,38 @@ function App() {
         console.log("📺 Estado showComments:", showComments);
     }, [showComments]);
 
+    useEffect(() => {
+        axios.get("http://localhost:8083/api/users")
+            .then(response => {
+                console.log("Usuarios cargados:", response.data);
+            })
+            .catch(error => {
+                console.error("Error al obtener usuarios:", error);
+            });
+    }, []);
+
     const fetchComments = async (productId) => {
         try {
             const response = await axios.get(`http://localhost:8082/ratings/product/${productId}`);
-            setComments(response.data);
+            const commentsData = response.data;
+
+            const commentsWithUserNames = await Promise.all(
+                commentsData.map(async (comment) => {
+                    try {
+                        // ¡Aquí es donde ocurre el 404 para el ID 1001!
+                        // Es porque 'comment.userId' (que viene del rating-service) es 1001
+                        // y tu users-service no tiene un usuario con ese ID.
+                        const userResponse = await axios.get(`http://localhost:8083/api/users/${comment.userId}`);
+                        const userName = userResponse.data.perfil ? userResponse.data.perfil.nombre : `Usuario ${comment.userId}`;
+                        return { ...comment, userName: userName };
+                    } catch (userError) {
+                        console.error(`Error al obtener nombre para el usuario ${comment.userId}:`, userError);
+                        // Asegúrate de que el log 'Error al obtener nombre para el usuario 1001' viene de aquí.
+                        return { ...comment, userName: `Usuario ${comment.userId} (Error)` };
+                    }
+                })
+            );
+            setComments(commentsWithUserNames);
         } catch (error) {
             console.error("❌ Error al cargar comentarios:", error);
         }
@@ -117,19 +156,25 @@ function App() {
     };
 
     const handleComprar = async () => {
+        // Validar si hay un usuario activo
+        if (!usuarioActivo || !usuarioActivo.id) {
+            alert("Debes iniciar sesión para realizar un pedido.");
+            return;
+        }
+
         if (cart.length === 0) {
             alert("Tu carrito está vacío.");
             return;
         }
 
-        const storeId = cart[0].storeId; // asumimos que todos los productos son de la misma tienda
+        const storeId = cart[0].storeId;
         const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
         const order = {
-            customerName: "Cliente Demo", // puedes luego usar un input o login
+            userId: usuarioActivo.id,
             storeId: storeId,
             totalAmount: totalAmount,
-            orderDate: new Date().toISOString(), // opcional
+            orderDate: new Date().toISOString(),
             items: cart.map(item => ({
                 productId: item.productId,
                 quantity: item.quantity,
@@ -141,13 +186,12 @@ function App() {
             const response = await axios.post("http://localhost:8081/orders", order);
 
             setOrderMessage(`Pedido Realizado\nID pedido: ${response.data.id}`);
-
-            setCart([]); // Vaciar carrito
+            setCart([]);
 
             setTimeout(() => {
-                setOrderMessage(null); // Ocultar mensaje
-                setCartOpen(false);    // Cerrar carrito después del mensaje
-            }, 3000); // 3 segundos visible
+                setOrderMessage(null);
+                setCartOpen(false);
+            }, 3000);
         } catch (error) {
             console.error("Error al realizar pedido:", error);
             alert("Hubo un error al procesar el pedido.");
@@ -201,35 +245,120 @@ function App() {
             });
     }, []);
 
+    const handleLogin = async () => {
+        try {
+            const response = await axios.post("http://localhost:8083/api/users/login", {
+                correo: loginEmail,
+                contrasena: loginPass
+            });
+            alert("Sesión iniciada como: " + response.data.correo);
+
+            // Guardar el usuario activo (puedes guardar el perfil también)
+            setUsuarioActivo(response.data);  // o response.data.perfil si prefieres
+
+            // Limpiar campos
+            setLoginEmail("");
+            setLoginPass("");
+            setShowLogin(false);
+            setUserPanelOpen(false);
+        } catch (err) {
+            alert("Credenciales incorrectas.");
+        }
+    };
+
+    const handleRegister = async () => {
+        try {
+            const cuentaResponse = await axios.post("http://localhost:8083/api/users/register", {
+                correo: regEmail,
+                contrasena: regPass
+            });
+
+            const cuentaId = cuentaResponse.data.id;
+
+            await axios.post(`http://localhost:8083/api/users/${cuentaId}/profile`, {
+                nombre: regNombre,
+                direccion: regDireccion,
+                telefono: regTelefono
+            });
+
+            alert("¡Cuenta registrada con éxito!");
+
+            // Limpiar campos
+            setRegEmail("");
+            setRegPass("");
+            setRegNombre("");
+            setRegDireccion("");
+            setRegTelefono("");
+            setShowRegister(false);
+            setUserPanelOpen(false);
+        } catch (err) {
+            alert("Error al registrar: " + (err.response?.data?.correo || "Error desconocido"));
+        }
+    };
+
     const handleEnviarRating = async () => {
+        // --- 🔴 CONSOLE.LOG 1: Antes de cualquier validación para ver el estado del usuario ---
+        console.log("🟠 Intentando enviar comentario.");
+        console.log("🟠 Usuario Activo:", usuarioActivo);
+
+        if (!usuarioActivo || !usuarioActivo.id) {
+            alert("Debes iniciar sesión para enviar una calificación.");
+            console.log("❌ Error: Usuario no activo o sin ID.");
+            return;
+        }
+
         if (!selectedProductForComments || !selectedStore) {
             alert("Error: producto o tienda no seleccionados");
+            console.log("❌ Error: Producto o tienda no seleccionados.");
             return;
         }
 
         if (selectedStars === "⭐") {
             alert("Por favor, selecciona una puntuación de estrellas antes de enviar.");
+            console.log("❌ Error: Estrellas no seleccionadas.");
             return;
         }
 
         const ratingData = {
             storeId: selectedStore.id,
-            productId: selectedProductForComments.id,  // ✅ Nuevo: asociar comentario al producto
-            userId: 1, // Cambia esto si tienes un sistema de usuarios
-            score: parseInt(selectedStars[0]), // ✅ convertir '3⭐' a número
-            comment: commentText.trim()
+            productId: selectedProductForComments.id,
+            userId: usuarioActivo.id,
+            score: parseInt(selectedStars[0]),
+            comment: newComment.trim()
         };
+
+        // --- 🔴 CONSOLE.LOG 2: Mostrar el payload que se va a enviar ---
+        console.log("🟠 Payload de comentario a enviar:", ratingData);
+        console.log("🟠 URL de destino:", "http://localhost:8082/ratings");
+
 
         try {
             const response = await axios.post("http://localhost:8082/ratings", ratingData);
-            console.log("✅ Calificación enviada:", response.data);
+
+            // --- 🔴 CONSOLE.LOG 3: Si la petición fue exitosa ---
+            console.log("✅ Calificación enviada con éxito. Respuesta del backend:", response.data);
+
             alert("¡Gracias por tu calificación!");
 
-            setCommentText("");           // Limpiar comentario
-            setSelectedStars("⭐");       // Resetear estrellas
-            fetchComments(selectedProductForComments.id); // ✅ Cargar comentarios del producto
+            setCommentText("");
+            setSelectedStars("⭐");
+            fetchComments(selectedProductForComments.id);
         } catch (error) {
-            console.error("❌ Error al enviar rating:", error);
+            // --- 🔴 CONSOLE.LOG 4: Si hubo un error en la petición ---
+            console.error("❌ Error al enviar rating. Objeto de error completo:", error);
+            if (error.response) {
+                // El servidor respondió con un status diferente de 2xx
+                console.error("❌ Detalles de la respuesta de error del servidor:", error.response.data);
+                console.error("❌ Status del error:", error.response.status);
+                console.error("❌ Headers del error:", error.response.headers);
+            } else if (error.request) {
+                // La petición fue hecha pero no hubo respuesta
+                console.error("❌ No se recibió respuesta del servidor (error.request):", error.request);
+            } else {
+                // Algo más causó el error al configurar la petición
+                console.error("❌ Error al configurar la petición (error.message):", error.message);
+            }
+
             alert("Ocurrió un error al enviar tu calificación.");
         }
     };
@@ -270,12 +399,107 @@ function App() {
             </section>
 
             <div className="contenedor-transparente">
-                {/* Botón fijo flotante del carrito */}
-                <div className="cart-button" onClick={() => setCartOpen(!cartOpen)}>
-                    <img src="/carrito.png" alt="Carrito"/>
+                {/* Botón fijo flotante del usuario */}
+                {/* Botón flotante del usuario */}
+                <div className="user-button" onClick={() => setUserPanelOpen(!userPanelOpen)}>
+                    <div className="user-icon">👤</div>
+                    {usuarioActivo?.perfil?.nombre && (
+                        <div className="user-name">{usuarioActivo.perfil.nombre}</div>
+                    )}
                 </div>
 
-                {cartOpen && <div className="backdrop" onClick={() => setCartOpen(false)}></div>}
+                {/* Fondo oscuro para cerrar el panel al hacer clic fuera */}
+                {userPanelOpen && <div className="backdrop" onClick={() => {
+                    setUserPanelOpen(false);
+                    setShowLogin(false);
+                    setShowRegister(false);
+                }}></div>}
+
+                {/* Botón fijo flotante del carrito */}
+                <div className="cart-button" onClick={() => setCartOpen(!cartOpen)}>
+                    🛒
+                </div>
+
+                {userPanelOpen && (
+                    <div className="backdrop" onClick={() => {
+                        setUserPanelOpen(false);
+                        setShowLogin(false);
+                        setShowRegister(false);
+                    }}>
+                        <div
+                            className={`user-overlay ${userPanelOpen ? 'open' : ''}`}
+                            onClick={(e) => e.stopPropagation()} // ⛔ Evita que el clic dentro del panel cierre todo
+                        >
+                            <div className="user-header">
+                                {(showLogin || showRegister) ? (
+                                    <button
+                                        className="close-user-button"
+                                        onClick={() => {
+                                            setShowLogin(false);
+                                            setShowRegister(false);
+                                            setLoginEmail("");
+                                            setLoginPass("");
+                                            setRegEmail("");
+                                            setRegPass("");
+                                            setRegNombre("");
+                                            setRegDireccion("");
+                                            setRegTelefono("");
+                                        }}
+                                    >
+                                        ←
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="close-user-button"
+                                        onClick={() => {
+                                            setUserPanelOpen(false);
+                                            setLoginEmail("");
+                                            setLoginPass("");
+                                            setRegEmail("");
+                                            setRegPass("");
+                                            setRegNombre("");
+                                            setRegDireccion("");
+                                            setRegTelefono("");
+                                        }}
+                                    >
+                                        ←
+                                    </button>
+                                )}
+                                <h2>
+                                    {showLogin ? "Iniciar Sesión" : showRegister ? "Registrarse" : "Usuario"}
+                                </h2>
+                            </div>
+
+                            <div className="user-content">
+                                {!showLogin && !showRegister && (
+                                    <>
+                                        <button onClick={() => { setShowLogin(true); setShowRegister(false); }}>Iniciar Sesión</button>
+                                        <button onClick={() => { setShowRegister(true); setShowLogin(false); }}>Registrarse</button>
+                                    </>
+                                )}
+
+                                {showLogin && (
+                                    <>
+                                        <input type="email" placeholder="Correo" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
+                                        <input type="password" placeholder="Contraseña" value={loginPass} onChange={e => setLoginPass(e.target.value)} />
+                                        <button onClick={handleLogin}>Entrar</button>
+                                    </>
+                                )}
+
+                                {showRegister && (
+                                    <>
+                                        <input type="email" placeholder="Correo" value={regEmail} onChange={e => setRegEmail(e.target.value)} />
+                                        <input type="password" placeholder="Contraseña" value={regPass} onChange={e => setRegPass(e.target.value)} />
+                                        <input type="text" placeholder="Nombre" value={regNombre} onChange={e => setRegNombre(e.target.value)} />
+                                        <input type="text" placeholder="Dirección" value={regDireccion} onChange={e => setRegDireccion(e.target.value)} />
+                                        <input type="number" placeholder="Teléfono" value={regTelefono} onChange={e => setRegTelefono(e.target.value)} />
+                                        <button onClick={handleRegister}>Registrar</button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className={`cart-overlay ${cartOpen ? 'open' : ''}`}>
                     <div className="cart-header">
@@ -385,7 +609,7 @@ function App() {
                     ) : (
                         comments.map((comment, index) => (
                             <div key={index} className="comment-item">
-                                <p className="comment-user">Usuario {comment.userId}</p>
+                                <p className="comment-user">{comment.userName}</p>
                                 <div className="comment-content">
                                     <span>{comment.comment}</span>
                                     <span>{comment.score}⭐</span>
@@ -409,7 +633,7 @@ function App() {
                             try {
                                 const payload = {
                                     storeId: selectedStore.id,
-                                    userId: 999, // reemplaza con ID real si tienes login
+                                    userId: usuarioActivo.id, // reemplaza con ID real si tienes login
                                     comment: newComment,
                                     score: parseInt(selectedStars[0]),
                                     productId: selectedProductForComments.id,

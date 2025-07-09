@@ -7,8 +7,11 @@ import java.util.List;
 
 public class OrderDTO {
 
-    @NotBlank(message = "El nombre del cliente es obligatorio")
-    private String customerName;
+    @NotNull(message = "El ID del usuario es obligatorio")
+    private Long userId; // Se mantiene, ahora es el identificador principal del cliente
+
+    // ELIMINADO: @NotBlank(message = "El nombre del cliente es obligatorio")
+    // ELIMINADO: private String customerName;
 
     @NotNull(message = "El ID de la tienda es obligatorio")
     private Long storeId;
@@ -24,15 +27,24 @@ public class OrderDTO {
 
     public OrderDTO() {}
 
-    public OrderDTO(Long storeId, String customerName, LocalDateTime orderDate, double totalAmount, List<OrderItemDTO> items) {
+    // Constructor actualizado, customerName eliminado
+    public OrderDTO(Long userId, Long storeId, LocalDateTime orderDate, double totalAmount, List<OrderItemDTO> items) {
+        this.userId = userId;
         this.storeId = storeId;
-        this.customerName = customerName;
         this.orderDate = orderDate;
         this.totalAmount = totalAmount;
         this.items = items;
     }
 
-    // Getters y setters
+    // --- Getters y setters ---
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     public Long getStoreId() {
         return storeId;
@@ -40,14 +52,6 @@ public class OrderDTO {
 
     public void setStoreId(Long storeId) {
         this.storeId = storeId;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
     }
 
     public LocalDateTime getOrderDate() {

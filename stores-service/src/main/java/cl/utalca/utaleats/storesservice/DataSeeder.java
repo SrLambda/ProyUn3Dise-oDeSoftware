@@ -74,7 +74,7 @@ public class DataSeeder {
                 productRepository.saveAll(Arrays.asList(
                         new Product(null, "Bowl de Quinoa y Verduras", "images/store5/product1.jpg", 12.00, store5),
                         new Product(null, "Hamburguesa de Lentejas", "images/store5/product2.jpg", 10.50, store5),
-                        new Product(null, "Wrap de Hummus y Falafel", "images/store5/product3.jpg", 9.00, store5),
+                        new Product(null, "Wrap de Hummus y Falafel", "images/store5/farid_dick.png", 9.00, store5),
                         new Product(null, "Sopa de Lentejas Roja", "images/store5/product4.jpg", 6.00, store5),
                         new Product(null, "Brownie Vegano", "images/store5/product5.jpg", 4.50, store5)
                 ));
